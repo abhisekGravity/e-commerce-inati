@@ -1,18 +1,16 @@
 package com.example.commerce.product;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/products")
 public class ProductController {
 
     private final ProductService service;
-
-    public ProductController(ProductService service) {
-        this.service = service;
-    }
 
     @PostMapping
     public Product create(@RequestBody Product product) {

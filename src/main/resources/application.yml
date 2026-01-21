@@ -1,7 +1,9 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost:27017/commerce
+      uri: mongodb://localhost:27017/e-commerce
 
 server:
   port: 8080
+  error:
+    include-message: always

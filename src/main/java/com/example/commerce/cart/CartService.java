@@ -69,4 +69,18 @@ public class CartService {
                 .getAuthentication()
                 .getPrincipal();
     }
+
+    public Cart getActiveCart(String userId) {
+        return cartRepository
+                .findByUserIdAndTenantIdAndActiveTrue(
+                        userId,
+                        TenantContext.getTenantId()
+                )
+                .orElse(null);
+    }
+
+    public void deactivateCart(Cart cart) {
+        cart.setActive(false);
+        cartRepository.save(cart);
+    }
 }

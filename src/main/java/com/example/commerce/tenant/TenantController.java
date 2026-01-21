@@ -1,6 +1,7 @@
 package com.example.commerce.tenant;
 
 import com.example.commerce.tenant.dto.TenantCreateRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,7 @@ public class TenantController {
     private final TenantService tenantService;
 
     @PostMapping("/create")
-    public Tenant create(@RequestBody TenantCreateRequest request) {
+    public Tenant create(@Valid @RequestBody TenantCreateRequest request) {
         return tenantService.createTenant(request.getName());
     }
 

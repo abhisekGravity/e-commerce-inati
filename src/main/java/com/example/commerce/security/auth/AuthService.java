@@ -2,11 +2,16 @@ package com.example.commerce.security.auth;
 
 import com.example.commerce.User.User;
 import com.example.commerce.User.UserRepository;
+import com.example.commerce.config.SecurityConfig;
+import com.example.commerce.exception.UserAlreadyExistsException;
+import com.example.commerce.security.SecurityUtils;
 import com.example.commerce.security.auth.dto.AuthRequest;
 import com.example.commerce.security.jwt.JwtService;
 import com.example.commerce.tenant.TenantContext;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -21,29 +26,47 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     public String register(AuthRequest request) {
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPasswordHash(encoder.encode(request.getPassword()));
-        user.setTenant();
+        String currentTenantId = TenantContext.getTenantId();
+
+        if (currentTenantId == null) {
+            throw new IllegalStateException("Tenant Context is missing.");
+        }
+
+        if (userRepository.existsByTenantIdAndEmail(currentTenantId, request.getEmail())) {
+            throw new UserAlreadyExistsException("Email already in use for this tenant");
+        }
+
+        User user = User.builder()
+                .tenantId(currentTenantId)
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .build();
 
         userRepository.save(user);
 
-        return jwtService.generateAccessToken(user.getId(), user.getTenantId());
+        return jwtService.generateAccessToken(user.getId(), user.getTenantId(), user.getTokenVersion());
     }
 
     public AuthTokens login(AuthRequest request) {
-        User user = userRepository
-                .findByTenantIdAndEmail(TenantContext.getTenantId(), request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        String tenantId = TenantContext.getTenantId();
 
-        if (!encoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid credentials");
+        User user = userRepository
+                .findByTenantIdAndEmail(tenantId, request.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new BadCredentialsException("Invalid credentials");
         }
 
-        return issueTokens(user);
+        user.setTokenVersion(user.getTokenVersion() + 1);
+        userRepository.save(user);
+
+        refreshTokenRepository.deleteAllByUserId(user.getId());
+
+        return issueNewTokenPair(user);
     }
 
     public AuthTokens refresh(String rawRefreshToken) {
@@ -57,27 +80,33 @@ public class AuthService {
             throw new RuntimeException("Refresh token expired");
         }
 
-        stored.setRevoked(true);
-        refreshTokenRepository.save(stored);
-
         User user = userRepository.findById(stored.getUserId())
                 .orElseThrow();
 
-        return issueTokens(user);
+        String newAccessToken = jwtService.generateAccessToken(
+                user.getId(),
+                user.getTenantId(),
+                user.getTokenVersion()
+        );
+
+        return new AuthTokens(newAccessToken, rawRefreshToken);
     }
 
-    public void logout(String rawRefreshToken) {
-        String hash = hash(rawRefreshToken);
-        refreshTokenRepository.findByTokenHashAndRevokedFalse(hash)
-                .ifPresent(token -> {
-                    token.setRevoked(true);
-                    refreshTokenRepository.save(token);
-                });
+    public void logout(String userId, String tenantId) {
+        User user = userRepository
+                .findByIdAndTenantId(userId, tenantId)
+                .orElseThrow();
+
+        user.setTokenVersion(user.getTokenVersion() + 1);
+        userRepository.save(user);
     }
 
-    private AuthTokens issueTokens(User user) {
-        String accessToken =
-                jwtService.generateAccessToken(user.getId(), user.getTenantId());
+    private AuthTokens issueNewTokenPair(User user) {
+        String accessToken = jwtService.generateAccessToken(
+                user.getId(),
+                user.getTenantId(),
+                user.getTokenVersion()
+        );
 
         String refreshToken = Base64.getUrlEncoder().encodeToString(
                 (user.getId() + ":" + System.nanoTime()).getBytes()

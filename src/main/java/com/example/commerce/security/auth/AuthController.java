@@ -2,13 +2,16 @@ package com.example.commerce.security.auth;
 
 import com.example.commerce.security.auth.dto.AuthRequest;
 import com.example.commerce.security.auth.dto.AuthResponse;
-import jakarta.servlet.http.Cookie;
+import com.example.commerce.security.jwt.UserTenantPrincipal;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -36,8 +39,12 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public AuthResponse refresh(
-            @CookieValue("refresh_token") String refreshToken,
+            @CookieValue(name = "refresh_token", required = false) String refreshToken,
             HttpServletResponse response) {
+
+        if (refreshToken == null) {
+            throw new IllegalArgumentException("Refresh token is missing");
+        }
 
         AuthTokens tokens = authService.refresh(refreshToken);
         setRefreshCookie(response, tokens.getRefreshToken());
@@ -46,23 +53,33 @@ public class AuthController {
 
     @PostMapping("/logout")
     public void logout(
-            @CookieValue("refresh_token") String refreshToken,
+            @AuthenticationPrincipal UserTenantPrincipal principal,
             HttpServletResponse response) {
 
-        authService.logout(refreshToken);
+        if (principal != null) {
+            authService.logout(principal.getUserId(), principal.getTenantId());
+        }
 
-        Cookie cookie = new Cookie("refresh_token", "");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private void setRefreshCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("refresh_token", token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 3600);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 3600)
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

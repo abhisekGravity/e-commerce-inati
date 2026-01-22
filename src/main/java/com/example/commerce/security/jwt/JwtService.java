@@ -19,16 +19,16 @@ public class JwtService {
         this.keyProvider = keyProvider;
     }
 
-    public String generateAccessToken(String userId, String tenantId) {
+    public String generateAccessToken(String userId, String tenantId, int tokenVersion) {
         try {
-            PrivateKey privateKey = keyProvider.getPrivateKey();
 
             return Jwts.builder()
                     .setSubject(userId)
                     .claim("tenantId", tenantId)
+                    .claim("tokenVersion", tokenVersion)
                     .setIssuedAt(new Date())
-                    .setExpiration(Date.from(Instant.now().plusSeconds(900))) // 15 min
-                    .signWith(privateKey, SignatureAlgorithm.RS256)
+                    .setExpiration(Date.from(Instant.now().plusSeconds(900)))
+                    .signWith(keyProvider.getPrivateKey(), SignatureAlgorithm.RS256)
                     .compact();
 
         } catch (Exception e) {

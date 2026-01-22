@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TenantAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleTenantExists(TenantAlreadyExistsException ex) {
         return ResponseEntity
-                .status(HttpStatus.CONFLICT) // 409 Conflict
+                .status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
 
@@ -37,5 +37,12 @@ public class GlobalExceptionHandler {
         });
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleUserExists(UserAlreadyExistsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
     }
 }

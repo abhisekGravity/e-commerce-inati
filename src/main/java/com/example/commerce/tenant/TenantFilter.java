@@ -19,7 +19,10 @@ public class TenantFilter extends OncePerRequestFilter {
 
     private final TenantRepository tenantRepository;
 
-    private static final Set<String> PUBLIC_ENDPOINTS = Set.of("/auth", "/tenants", "/error");
+    private static final Set<String> PUBLIC_ENDPOINTS = Set.of(
+            "/tenants",
+            "/error"
+    );
 
     @Override
     protected void doFilterInternal(
@@ -30,15 +33,19 @@ public class TenantFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String tenantSlug = request.getHeader("x-tenant-slug");
 
-        boolean isPublicEndpoint = PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith);
+        boolean isPublicEndpoint =
+                PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith);
 
-        if (!isPublicEndpoint && tenantSlug == null) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Missing x-tenant-slug header");
+        if (!isPublicEndpoint && (tenantSlug == null || tenantSlug.isBlank())) {
+            response.sendError(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Missing x-tenant-slug header"
+            );
             return;
         }
 
         try {
-            if (tenantSlug != null) {
+            if (tenantSlug != null && !tenantSlug.isBlank()) {
                 Tenant tenant = tenantRepository.findByTenantSlug(tenantSlug)
                         .orElseThrow(() -> new TenantNotFoundException(tenantSlug));
 
@@ -50,7 +57,9 @@ public class TenantFilter extends OncePerRequestFilter {
         } catch (TenantNotFoundException e) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Tenant not found for slug: " + tenantSlug + "\"}");
+            response.getWriter().write(
+                    "{\"error\":\"Tenant not found for slug: " + tenantSlug + "\"}"
+            );
         } finally {
             TenantContext.clear();
         }

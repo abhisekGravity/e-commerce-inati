@@ -1,4 +1,4 @@
-package com.example.commerce.exception;
+package com.example.commerce.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,5 +1,6 @@
 package com.example.commerce.exception;
 
+import com.example.commerce.common.ApiErrorResponse;
 import com.example.commerce.exception.auth.AuthException;
 import com.example.commerce.exception.tenant.TenantException;
 import org.springframework.http.HttpStatus;

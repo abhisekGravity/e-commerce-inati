@@ -19,8 +19,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -32,49 +32,66 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
-
         try {
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
+            String authHeader = request.getHeader("Authorization");
 
-                Claims claims = jwtService.validateToken(token);
-
-                String userId = claims.getSubject();
-                String tenantId = claims.get("tenantId", String.class);
-                Integer tokenVersion = claims.get("tokenVersion", Integer.class);
-
-                String contextTenantId = TenantContext.getTenantId();
-                if (contextTenantId != null && !contextTenantId.equals(tenantId)) {
-                    throw new RuntimeException("Tenant mismatch");
-                }
-
-                User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new RuntimeException("User not found"));
-
-                if (!tokenVersion.equals(user.getTokenVersion())) {
-                    throw new RuntimeException("Session expired");
-                }
-
-                UserTenantPrincipal principal =
-                        new UserTenantPrincipal(userId, tenantId);
-
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                principal, null, Collections.emptyList());
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                reject(response);
+                return;
             }
+
+            String token = authHeader.substring(7);
+            Claims claims = jwtService.validateToken(token);
+
+            String userId = claims.getSubject();
+            String tenantId = claims.get("tenantId", String.class);
+            Integer tokenVersion = claims.get("tokenVersion", Integer.class);
+
+            String contextTenantId = TenantContext.getTenantId();
+            if (contextTenantId != null && !contextTenantId.equals(tenantId)) {
+                reject(response);
+                return;
+            }
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow();
+
+            if (!tokenVersion.equals(user.getTokenVersion())) {
+                reject(response);
+                return;
+            }
+
+            UserTenantPrincipal principal =
+                    new UserTenantPrincipal(userId, tenantId);
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            principal, null, Collections.emptyList());
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
-            TenantContext.clear();
-            SecurityContextHolder.clearContext();
-
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write("{\"error\":\"Unauthorized\"}");
+            reject(response);
         }
+    }
+
+    private void reject(HttpServletResponse response) throws IOException {
+        TenantContext.clear();
+        SecurityContextHolder.clearContext();
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write("{\"error\":\"Unauthorized\"}");
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+
+        String path = request.getRequestURI();
+
+        return path.startsWith("/auth/")
+                || path.startsWith("/tenants/")
+                || path.equals("/error");
     }
 }

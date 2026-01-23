@@ -11,26 +11,21 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/register")
-    public AuthResponse register(
-            @Valid @RequestBody AuthRequest request,
-            HttpServletResponse response) {
-
-        String accessToken = authService.register(request);
-        return new AuthResponse(accessToken);
+    public AuthResponse register(@Valid @RequestBody AuthRequest request) {
+        return new AuthResponse(authService.register(request));
     }
 
     @PostMapping("/login")
-    public AuthResponse login(
-            @Valid @RequestBody AuthRequest request,
-            HttpServletResponse response) {
+    public AuthResponse login(@Valid @RequestBody AuthRequest request,
+                              HttpServletResponse response) {
 
         AuthTokens tokens = authService.login(request);
         setRefreshCookie(response, tokens.getRefreshToken());
@@ -39,12 +34,8 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public AuthResponse refresh(
-            @CookieValue(name = "refresh_token", required = false) String refreshToken,
+            @CookieValue(name = "refresh_token") String refreshToken,
             HttpServletResponse response) {
-
-        if (refreshToken == null) {
-            throw new IllegalArgumentException("Refresh token is missing");
-        }
 
         AuthTokens tokens = authService.refresh(refreshToken);
         setRefreshCookie(response, tokens.getRefreshToken());
@@ -52,9 +43,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public void logout(
-            @AuthenticationPrincipal UserTenantPrincipal principal,
-            HttpServletResponse response) {
+    public void logout(@AuthenticationPrincipal UserTenantPrincipal principal,
+                       HttpServletResponse response) {
 
         if (principal != null) {
             authService.logout(principal.getUserId(), principal.getTenantId());
@@ -62,10 +52,8 @@ public class AuthController {
 
         ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
-                .secure(false)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -74,10 +62,8 @@ public class AuthController {
     private void setRefreshCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
                 .httpOnly(true)
-                .secure(false)
                 .path("/")
                 .maxAge(7 * 24 * 3600)
-                .sameSite("Strict")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

@@ -2,9 +2,7 @@ package com.example.commerce.security.auth;
 
 import com.example.commerce.User.User;
 import com.example.commerce.User.UserRepository;
-import com.example.commerce.config.SecurityConfig;
 import com.example.commerce.exception.UserAlreadyExistsException;
-import com.example.commerce.security.SecurityUtils;
 import com.example.commerce.security.auth.dto.AuthRequest;
 import com.example.commerce.security.jwt.JwtService;
 import com.example.commerce.tenant.TenantContext;
@@ -47,7 +45,8 @@ public class AuthService {
 
         userRepository.save(user);
 
-        return jwtService.generateAccessToken(user.getId(), user.getTenantId(), user.getTokenVersion());
+        return jwtService.generateAccessToken(
+                user.getId(), user.getTenantId(), user.getTokenVersion());
     }
 
     public AuthTokens login(AuthRequest request) {
@@ -70,6 +69,7 @@ public class AuthService {
     }
 
     public AuthTokens refresh(String rawRefreshToken) {
+
         String hash = hash(rawRefreshToken);
 
         RefreshToken stored = refreshTokenRepository
@@ -83,6 +83,10 @@ public class AuthService {
         User user = userRepository.findById(stored.getUserId())
                 .orElseThrow();
 
+        if (stored.getTokenVersion() != user.getTokenVersion()) {
+            throw new RuntimeException("Refresh token invalidated");
+        }
+
         String newAccessToken = jwtService.generateAccessToken(
                 user.getId(),
                 user.getTenantId(),
@@ -93,20 +97,21 @@ public class AuthService {
     }
 
     public void logout(String userId, String tenantId) {
+
         User user = userRepository
                 .findByIdAndTenantId(userId, tenantId)
                 .orElseThrow();
 
         user.setTokenVersion(user.getTokenVersion() + 1);
         userRepository.save(user);
+
+        refreshTokenRepository.deleteAllByUserId(user.getId());
     }
 
     private AuthTokens issueNewTokenPair(User user) {
+
         String accessToken = jwtService.generateAccessToken(
-                user.getId(),
-                user.getTenantId(),
-                user.getTokenVersion()
-        );
+                user.getId(), user.getTenantId(), user.getTokenVersion());
 
         String refreshToken = Base64.getUrlEncoder().encodeToString(
                 (user.getId() + ":" + System.nanoTime()).getBytes()
@@ -117,6 +122,7 @@ public class AuthService {
         entity.setTenantId(user.getTenantId());
         entity.setTokenHash(hash(refreshToken));
         entity.setExpiresAt(Instant.now().plusSeconds(7 * 24 * 3600));
+        entity.setTokenVersion(user.getTokenVersion());
         entity.setRevoked(false);
 
         refreshTokenRepository.save(entity);

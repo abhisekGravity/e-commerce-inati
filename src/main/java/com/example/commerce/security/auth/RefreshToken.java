@@ -1,5 +1,6 @@
 package com.example.commerce.security.auth;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -9,6 +10,7 @@ import java.time.Instant;
 
 @Document("refresh_tokens")
 @Data
+@Builder
 public class RefreshToken {
 
     @Id

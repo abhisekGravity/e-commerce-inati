@@ -19,7 +19,6 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -122,11 +121,12 @@ public class AuthService {
 
         String refreshToken =generateRefreshToken();
 
-        RefreshToken entity = new RefreshToken();
-        entity.setUserId(user.getId());
-        entity.setTenantId(user.getTenantId());
-        entity.setTokenHash(hash(refreshToken));
-        entity.setExpiresAt(Instant.now().plusSeconds(7 * 24 * 3600));
+        RefreshToken entity = RefreshToken.builder()
+                .userId(user.getId())
+                .tenantId(user.getTenantId())
+                .tokenHash(hash(refreshToken))
+                .expiresAt(Instant.now().plusSeconds(7 * 24 * 3600))
+                .build();
 
         refreshTokenRepository.save(entity);
 

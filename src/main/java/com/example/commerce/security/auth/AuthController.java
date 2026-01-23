@@ -7,7 +7,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.http.HttpResponse;
 
 @RestController
 @RequestMapping("/auth")
@@ -41,8 +44,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public void logout(
-            @CookieValue(name = "refresh_token") String refreshToken,
+    public ResponseEntity<String> logout(
+            @CookieValue(name = "refresh_token", required = false) String refreshToken,
             HttpServletResponse response
     ) {
         if (refreshToken != null) {
@@ -56,8 +59,11 @@ public class AuthController {
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-    }
 
+        return ResponseEntity.ok(
+                ("User logged out successfully")
+        );
+    }
 
     private void setRefreshCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", token)

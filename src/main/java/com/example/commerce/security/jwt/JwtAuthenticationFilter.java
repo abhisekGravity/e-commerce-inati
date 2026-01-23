@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+            FilterChain filterChain) throws IOException, ServletException {
 
         try {
             String authHeader = request.getHeader("Authorization");
@@ -44,14 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtService.validateToken(token);
 
             String userId = claims.getSubject();
-            String tenantId = claims.get("tenantId", String.class);
             Integer tokenVersion = claims.get("tokenVersion", Integer.class);
-
-            String contextTenantId = TenantContext.getTenantId();
-            if (contextTenantId != null && !contextTenantId.equals(tenantId)) {
-                reject(response);
-                return;
-            }
 
             User user = userRepository.findById(userId)
                     .orElseThrow();
@@ -61,14 +54,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            UserTenantPrincipal principal =
-                    new UserTenantPrincipal(userId, tenantId);
-
-            UsernamePasswordAuthenticationToken authentication =
+            UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
-                            principal, null, Collections.emptyList());
+                            userId, null, Collections.emptyList());
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
             filterChain.doFilter(request, response);
 

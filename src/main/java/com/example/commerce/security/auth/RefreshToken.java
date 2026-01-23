@@ -24,7 +24,4 @@ public class RefreshToken {
 
     private Instant expiresAt;
 
-    private boolean revoked;
-
-    private int tokenVersion;
 }

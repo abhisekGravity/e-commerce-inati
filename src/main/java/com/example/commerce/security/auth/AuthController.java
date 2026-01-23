@@ -2,13 +2,11 @@ package com.example.commerce.security.auth;
 
 import com.example.commerce.security.auth.dto.AuthRequest;
 import com.example.commerce.security.auth.dto.AuthResponse;
-import com.example.commerce.security.jwt.UserTenantPrincipal;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,11 +41,12 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public void logout(@AuthenticationPrincipal UserTenantPrincipal principal,
-                       HttpServletResponse response) {
-
-        if (principal != null) {
-            authService.logout(principal.getUserId(), principal.getTenantId());
+    public void logout(
+            @CookieValue(name = "refresh_token") String refreshToken,
+            HttpServletResponse response
+    ) {
+        if (refreshToken != null) {
+            authService.logoutByRefreshToken(refreshToken);
         }
 
         ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
@@ -58,6 +57,7 @@ public class AuthController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
+
 
     private void setRefreshCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", token)

@@ -7,15 +7,19 @@ import com.example.commerce.security.auth.dto.AuthRequest;
 import com.example.commerce.security.jwt.JwtService;
 import com.example.commerce.tenant.TenantContext;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -73,7 +77,7 @@ public class AuthService {
         String hash = hash(rawRefreshToken);
 
         RefreshToken stored = refreshTokenRepository
-                .findByTokenHashAndRevokedFalse(hash)
+                .findByTokenHash(hash)
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
 
         if (stored.getExpiresAt().isBefore(Instant.now())) {
@@ -82,10 +86,6 @@ public class AuthService {
 
         User user = userRepository.findById(stored.getUserId())
                 .orElseThrow();
-
-        if (stored.getTokenVersion() != user.getTokenVersion()) {
-            throw new RuntimeException("Refresh token invalidated");
-        }
 
         String newAccessToken = jwtService.generateAccessToken(
                 user.getId(),
@@ -96,16 +96,23 @@ public class AuthService {
         return new AuthTokens(newAccessToken, rawRefreshToken);
     }
 
-    public void logout(String userId, String tenantId) {
+    @Transactional
+    public void logoutByRefreshToken(String refreshToken) {
 
-        User user = userRepository
-                .findByIdAndTenantId(userId, tenantId)
-                .orElseThrow();
+        RefreshToken token = refreshTokenRepository
+                .findByTokenHash(hash(refreshToken))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Invalid refresh token"
+                ));
 
-        user.setTokenVersion(user.getTokenVersion() + 1);
+        refreshTokenRepository.delete(token);
+
+        User user = userRepository.findById(token.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setTokenVersion(0);
         userRepository.save(user);
 
-        refreshTokenRepository.deleteAllByUserId(user.getId());
     }
 
     private AuthTokens issueNewTokenPair(User user) {
@@ -113,21 +120,23 @@ public class AuthService {
         String accessToken = jwtService.generateAccessToken(
                 user.getId(), user.getTenantId(), user.getTokenVersion());
 
-        String refreshToken = Base64.getUrlEncoder().encodeToString(
-                (user.getId() + ":" + System.nanoTime()).getBytes()
-        );
+        String refreshToken =generateRefreshToken();
 
         RefreshToken entity = new RefreshToken();
         entity.setUserId(user.getId());
         entity.setTenantId(user.getTenantId());
         entity.setTokenHash(hash(refreshToken));
         entity.setExpiresAt(Instant.now().plusSeconds(7 * 24 * 3600));
-        entity.setTokenVersion(user.getTokenVersion());
-        entity.setRevoked(false);
 
         refreshTokenRepository.save(entity);
 
         return new AuthTokens(accessToken, refreshToken);
+    }
+
+    private String generateRefreshToken() {
+        byte[] randomBytes = new byte[64];
+        new SecureRandom().nextBytes(randomBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
     }
 
     private String hash(String value) {

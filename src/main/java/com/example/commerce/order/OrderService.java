@@ -3,9 +3,7 @@ package com.example.commerce.order;
 import com.example.commerce.cart.Cart;
 import com.example.commerce.cart.CartItem;
 import com.example.commerce.cart.CartService;
-import com.example.commerce.exception.BusinessException;
 import com.example.commerce.inventory.InventoryService;
-import com.example.commerce.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +23,7 @@ public class OrderService {
 
         Cart cart = cartService.getActiveCart(userId);
         if (cart == null || cart.getItems().isEmpty()) {
-            throw new BusinessException("Cart is empty");
+            throw new RuntimeException("Cart is empty");
         }
 
         List<OrderItem> orderItems = new ArrayList<>();
@@ -40,7 +38,7 @@ public class OrderService {
                 );
 
                 if (product == null) {
-                    throw new BusinessException("Insufficient inventory");
+                    throw new RuntimeException("Insufficient inventory");
                 }
 
                 OrderItem oi = new OrderItem();

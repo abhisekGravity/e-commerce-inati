@@ -2,7 +2,10 @@ package com.example.commerce.security.auth;
 
 import com.example.commerce.User.User;
 import com.example.commerce.User.UserRepository;
-import com.example.commerce.exception.UserAlreadyExistsException;
+import com.example.commerce.exception.auth.InvalidRefreshTokenException;
+import com.example.commerce.exception.auth.RefreshTokenExpiredException;
+import com.example.commerce.exception.auth.UserAlreadyExistsException;
+import com.example.commerce.exception.auth.UserNotFoundException;
 import com.example.commerce.security.auth.dto.AuthRequest;
 import com.example.commerce.security.jwt.JwtService;
 import com.example.commerce.tenant.TenantContext;
@@ -37,7 +40,7 @@ public class AuthService {
         }
 
         if (userRepository.existsByTenantIdAndEmail(currentTenantId, request.getEmail())) {
-            throw new UserAlreadyExistsException("Email already in use for this tenant");
+            throw new UserAlreadyExistsException();
         }
 
         User user = User.builder()
@@ -77,10 +80,10 @@ public class AuthService {
 
         RefreshToken stored = refreshTokenRepository
                 .findByTokenHash(hash)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() -> new InvalidRefreshTokenException());
 
         if (stored.getExpiresAt().isBefore(Instant.now())) {
-            throw new RuntimeException("Refresh token expired");
+            throw new RefreshTokenExpiredException();
         }
 
         User user = userRepository.findById(stored.getUserId())
@@ -107,7 +110,7 @@ public class AuthService {
         refreshTokenRepository.delete(token);
 
         User user = userRepository.findById(token.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException());
 
         user.setTokenVersion(0);
         userRepository.save(user);

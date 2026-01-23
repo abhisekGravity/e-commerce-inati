@@ -1,6 +1,6 @@
 package com.example.commerce.tenant;
 
-import com.example.commerce.exception.TenantAlreadyExistsException;
+import com.example.commerce.exception.tenant.TenantAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;

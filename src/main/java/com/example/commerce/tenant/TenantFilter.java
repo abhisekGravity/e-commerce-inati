@@ -1,6 +1,6 @@
 package com.example.commerce.tenant;
 
-import com.example.commerce.exception.TenantNotFoundException;
+import com.example.commerce.exception.tenant.TenantNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

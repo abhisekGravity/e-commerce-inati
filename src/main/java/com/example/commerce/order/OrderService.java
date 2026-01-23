@@ -57,7 +57,6 @@ public class OrderService {
             order.setItems(orderItems);
             order.setTotal(total);
             order.setStatus("CREATED");
-            order.setTenant();
 
             cartService.deactivateCart(cart);
 

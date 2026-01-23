@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiErrorResponse(
                         "INTERNAL_SERVER_ERROR",
-                        "Something went wrong",
+                        ex.getMessage(),
                         System.currentTimeMillis()
                 ));
     }

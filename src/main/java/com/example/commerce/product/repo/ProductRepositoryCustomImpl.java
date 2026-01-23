@@ -1,5 +1,7 @@
-package com.example.commerce.product;
+package com.example.commerce.product.repo;
 
+import com.example.commerce.product.Product;
+import com.example.commerce.product.ProductCriteriaBuilder;
 import com.example.commerce.product.dto.ProductFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;

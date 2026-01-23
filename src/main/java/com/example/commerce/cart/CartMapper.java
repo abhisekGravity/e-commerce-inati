@@ -2,7 +2,7 @@ package com.example.commerce.cart;
 
 import com.example.commerce.pricing.PricingEngine;
 import com.example.commerce.product.Product;
-import com.example.commerce.product.ProductRepository;
+import com.example.commerce.product.repo.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 

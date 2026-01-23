@@ -4,6 +4,7 @@ import com.example.commerce.pricing.PricingEngine;
 import com.example.commerce.product.dto.CreateProductRequest;
 import com.example.commerce.product.dto.ProductFilter;
 import com.example.commerce.product.dto.ProductResponse;
+import com.example.commerce.product.repo.ProductRepository;
 import com.example.commerce.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,14 +20,19 @@ public class ProductService {
 
     public ProductResponse create(CreateProductRequest request) {
 
+        String tenantId = TenantContext.getTenantId();
+        String sku = request.getSku();
+
+        if (repository.existsByTenantIdAndSku(tenantId, sku)) {
+            throw new RuntimeException("SKU already exists for this tenant");
+        }
+
         Product product = Product.builder()
                 .sku(request.getSku())
                 .name(request.getName())
                 .basePrice(request.getBasePrice())
                 .inventory(request.getInventory())
                 .build();
-
-        product.setTenant();
 
         Product saved = repository.save(product);
         return toResponse(saved);

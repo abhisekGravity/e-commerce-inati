@@ -44,7 +44,6 @@ public class AuthService {
         }
 
         User user = User.builder()
-                .tenantId(currentTenantId)
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .build();

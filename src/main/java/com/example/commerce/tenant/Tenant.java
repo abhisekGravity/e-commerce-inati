@@ -8,6 +8,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Document("tenants")
 @Data
 @Builder
@@ -26,4 +28,7 @@ public class Tenant {
 
     @Builder.Default
     private boolean active = true;
+
+    @Builder.Default
+    private Instant createdAt = Instant.now();
 }

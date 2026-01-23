@@ -1,29 +1,31 @@
 package com.example.commerce.User;
 
+import com.example.commerce.common.TenantAwareEntity;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("users")
-@CompoundIndex(def = "{'tenantId':1, 'email':1}", unique = true)
+@CompoundIndex(
+        name = "tenant_email_unique_idx",
+        def = "{'tenantId': 1, 'email': 1}",
+        unique = true
+)
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+@SuperBuilder
+public class User extends TenantAwareEntity {
 
     @Id
     private String id;
 
-    private String tenantId;
-
     private String email;
     private String passwordHash;
 
-    @Builder.Default
     private int tokenVersion = 0;
 }

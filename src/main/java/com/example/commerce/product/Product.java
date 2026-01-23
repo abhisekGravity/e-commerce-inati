@@ -1,5 +1,6 @@
 package com.example.commerce.product;
 
+import com.example.commerce.common.TenantAwareEntity;
 import com.example.commerce.tenant.TenantContext;
 import lombok.Builder;
 import lombok.Data;
@@ -12,28 +13,19 @@ import java.math.BigDecimal;
 @Data
 @Builder
 @Document("products")
-@CompoundIndex(def = "{'tenantId':1, 'sku':1}", unique = true)
-public class Product {
+@CompoundIndex(
+        name = "tenant_sku_unique_idx",
+        def = "{'tenantId': 1, 'sku': 1}",
+        unique = true
+)
+public class Product extends TenantAwareEntity {
 
     @Id
     private String id;
 
-    private String tenantId;
     private String sku;
     private String name;
     private BigDecimal basePrice;
     private int inventory;
 
-    public void setTenant() {
-        if (tenantId == null) {
-            tenantId = TenantContext.getTenantId();
-        }
-    }
-
-    public void reduceInventory(int quantity) {
-        if (inventory - quantity < 0) {
-            throw new IllegalStateException("Insufficient inventory");
-        }
-        inventory -= quantity;
-    }
 }

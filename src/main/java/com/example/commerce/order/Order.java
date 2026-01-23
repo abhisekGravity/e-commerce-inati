@@ -1,5 +1,6 @@
 package com.example.commerce.order;
 
+import com.example.commerce.common.TenantAwareEntity;
 import com.example.commerce.tenant.TenantContext;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -11,12 +12,11 @@ import java.util.List;
 
 @Document("orders")
 @Data
-public class Order {
+public class Order extends TenantAwareEntity {
 
     @Id
     private String id;
 
-    private String tenantId;
     private String userId;
 
     private List<OrderItem> items;
@@ -24,11 +24,4 @@ public class Order {
     private BigDecimal total;
     private String status;
 
-    private Instant createdAt = Instant.now();
-
-    public void setTenant() {
-        if (tenantId == null) {
-            tenantId = TenantContext.getTenantId();
-        }
-    }
 }

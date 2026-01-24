@@ -27,7 +27,7 @@ public class JwtService {
                     .claim("tenantId", tenantId)
                     .claim("tokenVersion", tokenVersion)
                     .setIssuedAt(new Date())
-                    .setExpiration(Date.from(Instant.now().plusSeconds(900)))
+                    .setExpiration(Date.from(Instant.now().plusSeconds(7200))) // to be 900
                     .signWith(keyProvider.getPrivateKey(), SignatureAlgorithm.RS256)
                     .compact();
 

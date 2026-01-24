@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tenants")
+@RequestMapping("/tenants/admin")
 @RequiredArgsConstructor
-public class TenantController {
+public class TenantAdminController {
 
     private final TenantService tenantService;
 

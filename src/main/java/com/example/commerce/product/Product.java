@@ -1,7 +1,6 @@
 package com.example.commerce.product;
 
 import com.example.commerce.common.TenantAwareEntity;
-import com.example.commerce.tenant.TenantContext;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -18,6 +17,14 @@ import java.math.BigDecimal;
         def = "{'tenantId': 1, 'sku': 1}",
         unique = true
 )
+@CompoundIndex(
+        name = "tenant_price_idx",
+        def = "{'tenantId': 1, 'basePrice': 1}"
+)
+@CompoundIndex(
+        name = "tenant_inventory_idx",
+        def = "{'tenantId': 1, 'inventory': 1}"
+)
 public class Product extends TenantAwareEntity {
 
     @Id
@@ -27,5 +34,4 @@ public class Product extends TenantAwareEntity {
     private String name;
     private BigDecimal basePrice;
     private int inventory;
-
 }

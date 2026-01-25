@@ -2,6 +2,9 @@ package com.example.commerce.exception;
 
 import com.example.commerce.common.ApiErrorResponse;
 import com.example.commerce.exception.auth.AuthException;
+import com.example.commerce.exception.dscountRule.DiscountRuleException;
+import com.example.commerce.exception.order.OrderException;
+import com.example.commerce.exception.product.ProductException;
 import com.example.commerce.exception.tenant.TenantException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +36,17 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(TenantException.class)
+    public ResponseEntity<ApiErrorResponse> handleTenant(TenantException ex) {
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(new ApiErrorResponse(
+                        "TENANT_ERROR",
+                        ex.getMessage(),
+                        System.currentTimeMillis()
+                ));
+    }
+
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ApiErrorResponse> handleAuth(AuthException ex) {
         return ResponseEntity
@@ -44,12 +58,34 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(TenantException.class)
-    public ResponseEntity<ApiErrorResponse> handleTenant(TenantException ex) {
+    @ExceptionHandler(ProductException.class)
+    public ResponseEntity<ApiErrorResponse> handleProduct(ProductException ex) {
         return ResponseEntity
                 .status(ex.getStatus())
                 .body(new ApiErrorResponse(
-                        "TENANT_ERROR",
+                        "PRODUCT_ERROR",
+                        ex.getMessage(),
+                        System.currentTimeMillis()
+                ));
+    }
+
+    @ExceptionHandler(DiscountRuleException.class)
+    public ResponseEntity<ApiErrorResponse> handleDiscountRule(DiscountRuleException ex) {
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(new ApiErrorResponse(
+                        "DISCOUNT_RULE_ERROR",
+                        ex.getMessage(),
+                        System.currentTimeMillis()
+                ));
+    }
+
+    @ExceptionHandler(OrderException.class)
+    public ResponseEntity<ApiErrorResponse> handleOrder(OrderException ex) {
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(new ApiErrorResponse(
+                        "ORDER_ERROR",
                         ex.getMessage(),
                         System.currentTimeMillis()
                 ));

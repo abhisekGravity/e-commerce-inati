@@ -31,16 +31,15 @@ public class ProductController {
     public Page<ProductResponse> list(
             @RequestParam(required = false) String sku,
             @RequestParam(required = false) String name,
-            @RequestParam(required = false)
-            @DecimalMin("0.0") BigDecimal minPrice,
-            @RequestParam(required = false)
-            @DecimalMin("0.01") BigDecimal maxPrice,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Boolean inStock,
-            @RequestParam(defaultValue = "PRICE") @NotNull ProductSortField sortBy,
-            @RequestParam(defaultValue = "ASC") @NotNull Sort.Direction direction,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int limit,
-            @RequestParam(defaultValue = "0") @Min(0) int offset
+            @RequestParam(defaultValue = "PRICE") ProductSortField sortBy,
+            @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset
     ) {
+
         ProductFilter filter = ProductFilter.builder()
                 .sku(sku)
                 .name(name)
@@ -49,6 +48,7 @@ public class ProductController {
                 .inStock(inStock)
                 .build();
 
-        return service.list(filter, sortBy, direction, limit, offset);
-    }
+        return service.list(
+                filter, sortBy, direction, limit, offset);
+        }
 }

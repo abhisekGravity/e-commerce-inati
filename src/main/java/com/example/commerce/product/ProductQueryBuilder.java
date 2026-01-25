@@ -6,49 +6,66 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
-public final class ProductQueryBuilder {
-
-    private ProductQueryBuilder() {}
+public class ProductQueryBuilder {
 
     public static Query build(ProductFilter filter, Sort sort, int limit, int offset) {
         Query query = new Query();
+        query.addCriteria(buildCriteria(filter));
 
-        query.addCriteria(Criteria.where("tenantId").is(TenantContext.getTenantId()));
-
-        if (hasText(filter.getSku())) {
-            query.addCriteria(Criteria.where("sku").is(filter.getSku()));
+        if (sort != null) {
+            query.with(sort);
         }
 
-        if (hasText(filter.getName())) {
-            query.addCriteria(Criteria.where("name")
-                    .regex(".*" + Pattern.quote(filter.getName()) + ".*", "i"));
-        }
-
-        if (filter.getMinPrice() != null || filter.getMaxPrice() != null) {
-            Criteria price = Criteria.where("basePrice");
-            if (filter.getMinPrice() != null) price.gte(filter.getMinPrice());
-            if (filter.getMaxPrice() != null) price.lte(filter.getMaxPrice());
-            query.addCriteria(price);
-        }
-
-        if (Boolean.TRUE.equals(filter.getInStock())) {
-            query.addCriteria(Criteria.where("inventory").exists(true).gt(0));
-        }
-
-        query.with(sort).skip(offset).limit(limit);
-
+        query.skip(offset);
+        query.limit(limit);
         return query;
     }
 
     public static Query countQuery(ProductFilter filter) {
-        Query query = build(filter, Sort.unsorted(), 0, 0);
-        query.skip(0).limit(0);
+        Query query = new Query();
+        query.addCriteria(buildCriteria(filter));
         return query;
     }
 
-    private static boolean hasText(String value) {
-        return value != null && !value.isBlank();
+    private static Criteria buildCriteria(ProductFilter filter) {
+        List<Criteria> criteriaList = new ArrayList<>();
+
+        criteriaList.add(Criteria.where("tenantId")
+                .is(TenantContext.getTenantId()));
+
+        if (filter.getSku() != null) {
+            criteriaList.add(Criteria.where("sku")
+                    .regex(filter.getSku(), "i"));
+        }
+
+        if (filter.getName() != null) {
+            criteriaList.add(Criteria.where("name")
+                    .regex(filter.getName(), "i"));
+        }
+
+        if (filter.getMinPrice() != null) {
+            criteriaList.add(Criteria.where("basePrice")
+                    .gte(filter.getMinPrice()));
+        }
+
+        if (filter.getMaxPrice() != null) {
+            criteriaList.add(Criteria.where("basePrice")
+                    .lte(filter.getMaxPrice()));
+        }
+
+        if (filter.getInStock() != null) {
+            if (filter.getInStock()) {
+                criteriaList.add(Criteria.where("inventory").gt(0));
+            } else {
+                criteriaList.add(Criteria.where("inventory").is(0));
+            }
+        }
+
+        return new Criteria().andOperator(
+                criteriaList.toArray(new Criteria[0])
+        );
     }
 }

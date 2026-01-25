@@ -32,15 +32,17 @@ public class ProductService {
         return toResponse(repository.save(product));
     }
 
-    public Page<ProductResponse> list(ProductFilter filter,
-                                      ProductSortField sortBy,
-                                      Sort.Direction direction,
-                                      int limit,
-                                      int offset) {
+    public Page<ProductResponse> list(
+            ProductFilter filter,
+            ProductSortField sortBy,
+            Sort.Direction direction,
+            int limit,
+            int offset
+    ) {
 
-        if (filter.getMinPrice() != null
-                && filter.getMaxPrice() != null
-                && filter.getMinPrice().compareTo(filter.getMaxPrice()) > 0) {
+        if (filter.getMinPrice() != null &&
+                filter.getMaxPrice() != null &&
+                filter.getMinPrice().compareTo(filter.getMaxPrice()) > 0) {
             throw new IllegalArgumentException(
                     "minPrice cannot be greater than maxPrice"
             );

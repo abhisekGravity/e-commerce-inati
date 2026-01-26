@@ -16,15 +16,12 @@ public class OrderController {
      * Place order (idempotent)
      *
      * Required headers:
-     * - X-User-Id
-     * - X-Tenant-Id (resolved by middleware)
      * - Idempotency-Key
      */
     @PostMapping
     public Order placeOrder(
-            @RequestHeader("X-User-Id") String userId,
             @RequestHeader("Idempotency-Key") String idempotencyKey
     ) {
-        return orderService.placeOrder(userId, idempotencyKey);
+        return orderService.placeOrder(idempotencyKey);
     }
 }

@@ -15,16 +15,13 @@ public class CartController {
     @PostMapping("/add")
     public Cart addToCart(
             @RequestParam String sku,
-            @RequestParam int quantity,
-            @RequestHeader("X-User-Id") String userId
+            @RequestParam int quantity
     ) {
-        return cartService.addToCart(userId, sku, quantity);
+        return cartService.addToCart( sku, quantity);
     }
 
     @GetMapping
-    public Cart getCart(
-            @RequestHeader("X-User-Id") String userId
-    ) {
-        return cartService.getActiveCart(userId);
+    public Cart getCart() {
+        return cartService.getActiveCart();
     }
 }

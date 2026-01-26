@@ -9,6 +9,7 @@ import com.example.commerce.order.domain.OrderStatus;
 import com.example.commerce.order.repository.OrderRepository;
 import com.example.commerce.product.Product;
 import com.example.commerce.product.repo.ProductRepository;
+import com.example.commerce.security.SecurityUtil;
 import com.example.commerce.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -29,8 +30,9 @@ public class OrderService {
      * Idempotent + transactional order placement
      */
     @Transactional
-    public Order placeOrder(String userId, String idempotencyKey) {
+    public Order placeOrder( String idempotencyKey) {
 
+        String userId = SecurityUtil.getCurrentUserId();
         String tenantId = TenantContext.getTenantId();
 
         // 1️⃣ Idempotency check (VERY IMPORTANT)

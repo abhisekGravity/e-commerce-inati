@@ -8,6 +8,7 @@ import com.example.commerce.pricing.engine.PricingEngine;
 import com.example.commerce.pricing.service.PricingService;
 import com.example.commerce.product.Product;
 import com.example.commerce.product.repo.ProductRepository;
+import com.example.commerce.security.SecurityUtil;
 import com.example.commerce.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,9 @@ public class CartService {
     private final ProductRepository productRepository;
     private final PricingService pricingService;
 
-    public Cart addToCart(String userId, String sku, int quantity) {
+    public Cart addToCart( String sku, int quantity) {
 
+        String userId = SecurityUtil.getCurrentUserId();
         String tenantId = TenantContext.getTenantId();
 
         Product product = productRepository
@@ -64,7 +66,10 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-    public Cart getActiveCart(String userId) {
+    public Cart getActiveCart() {
+
+        String userId = SecurityUtil.getCurrentUserId();
+
         return cartRepository
                 .findByTenantIdAndUserIdAndActiveTrue(
                         TenantContext.getTenantId(),

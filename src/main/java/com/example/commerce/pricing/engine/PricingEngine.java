@@ -1,19 +1,17 @@
 package com.example.commerce.pricing.engine;
 
 import com.example.commerce.pricing.dto.PricingContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class PricingEngine {
 
-    private final List<PricingStrategy> strategies;
-
-    public PricingEngine(List<PricingStrategy> strategies) {
-        this.strategies = strategies;
-    }
+    private final List<PricingStrategy> strategies; // Injected by Spring
 
     public BigDecimal calculatePrice(PricingContext context) {
         BigDecimal price = context.basePrice();

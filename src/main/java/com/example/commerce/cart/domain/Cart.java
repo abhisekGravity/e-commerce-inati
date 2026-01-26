@@ -38,7 +38,6 @@ public class Cart extends TenantAwareEntity {
     @Builder.Default
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
-    /* ---------- Domain Logic ---------- */
 
     public void addOrUpdateItem(CartItem newItem) {
         items.removeIf(i -> i.getSku().equals(newItem.getSku()));

@@ -17,10 +17,8 @@ public class CartItem {
 
     private int quantity;
 
-    /** Final price after dynamic pricing */
     private BigDecimal unitPrice;
 
-    /** unitPrice × quantity */
     private BigDecimal totalPrice;
 
     public void recalculate() {

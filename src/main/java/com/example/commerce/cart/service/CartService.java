@@ -5,6 +5,7 @@ import com.example.commerce.cart.domain.CartItem;
 import com.example.commerce.cart.repository.CartRepository;
 import com.example.commerce.pricing.dto.PricingContext;
 import com.example.commerce.pricing.engine.PricingEngine;
+import com.example.commerce.pricing.service.PricingService;
 import com.example.commerce.product.Product;
 import com.example.commerce.product.repo.ProductRepository;
 import com.example.commerce.tenant.TenantContext;
@@ -19,7 +20,7 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
-    private final PricingEngine pricingEngine;
+    private final PricingService pricingService;
 
     public Cart addToCart(String userId, String sku, int quantity) {
 
@@ -46,7 +47,7 @@ public class CartService {
                 product.getInventory()
         );
 
-        BigDecimal finalUnitPrice = pricingEngine.calculatePrice(pricingContext);
+        BigDecimal finalUnitPrice = pricingService.getFinalPrice(pricingContext);
 
         CartItem item = CartItem.builder()
                 .productId(product.getId())

@@ -1,6 +1,6 @@
 package com.example.commerce.exception;
 
-import com.example.commerce.common.ApiErrorResponse;
+import com.example.commerce.common.response.ApiErrorResponse;
 import com.example.commerce.exception.auth.AuthException;
 import com.example.commerce.exception.dscountRule.DiscountRuleException;
 import com.example.commerce.exception.order.OrderException;

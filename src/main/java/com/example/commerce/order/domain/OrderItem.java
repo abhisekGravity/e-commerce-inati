@@ -17,7 +17,6 @@ public class OrderItem {
 
     private int quantity;
 
-    /** Snapshot price */
     private BigDecimal unitPrice;
 
     private BigDecimal totalPrice;

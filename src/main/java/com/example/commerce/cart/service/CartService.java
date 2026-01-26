@@ -4,12 +4,11 @@ import com.example.commerce.cart.domain.Cart;
 import com.example.commerce.cart.domain.CartItem;
 import com.example.commerce.cart.repository.CartRepository;
 import com.example.commerce.pricing.dto.PricingContext;
-import com.example.commerce.pricing.engine.PricingEngine;
 import com.example.commerce.pricing.service.PricingService;
-import com.example.commerce.product.Product;
+import com.example.commerce.product.domain.Product;
 import com.example.commerce.product.repo.ProductRepository;
-import com.example.commerce.security.SecurityUtil;
-import com.example.commerce.tenant.TenantContext;
+import com.example.commerce.security.util.SecurityUtil;
+import com.example.commerce.tenant.context.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

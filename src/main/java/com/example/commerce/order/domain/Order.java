@@ -1,6 +1,6 @@
 package com.example.commerce.order.domain;
 
-import com.example.commerce.common.TenantAwareEntity;
+import com.example.commerce.common.tenant.TenantAwareEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;

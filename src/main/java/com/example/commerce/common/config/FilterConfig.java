@@ -1,10 +1,10 @@
 package com.example.commerce.common.config;
 
-import com.example.commerce.common.rateLimit.RateLimitFilter;
+import com.example.commerce.common.filter.RateLimitFilter;
 import com.example.commerce.common.rateLimit.RateLimitService;
-import com.example.commerce.common.RequestLoggingFilter;
-import com.example.commerce.tenant.TenantFilter;
-import com.example.commerce.tenant.TenantRepository;
+import com.example.commerce.common.filter.RequestLoggingFilter;
+import com.example.commerce.tenant.filter.TenantFilter;
+import com.example.commerce.tenant.repository.TenantRepository;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,8 +1,8 @@
 package com.example.commerce.security.jwt;
 
-import com.example.commerce.User.User;
-import com.example.commerce.User.UserRepository;
-import com.example.commerce.tenant.TenantContext;
+import com.example.commerce.User.domain.User;
+import com.example.commerce.User.repository.UserRepository;
+import com.example.commerce.tenant.context.TenantContext;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

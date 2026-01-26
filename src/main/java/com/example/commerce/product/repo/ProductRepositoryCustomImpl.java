@@ -6,7 +6,6 @@ import com.example.commerce.product.dto.ProductFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
@@ -39,13 +38,4 @@ public class ProductRepositoryCustomImpl
 
         return new PageImpl<>(products, pageable, total);
     }
-
-    @Override
-    public boolean existsByTenantId(String tenantId) {
-        Query query = new Query(
-                Criteria.where("tenantId").is(tenantId)
-        );
-        return mongoTemplate.exists(query, Product.class);
-    }
-
 }

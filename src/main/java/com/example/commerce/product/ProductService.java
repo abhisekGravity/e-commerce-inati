@@ -1,9 +1,7 @@
 package com.example.commerce.product;
 
-import com.example.commerce.exception.ProductNotAvailableException;
 import com.example.commerce.product.dto.*;
 import com.example.commerce.product.repo.ProductRepository;
-import com.example.commerce.product.repo.ProductRepositoryCustom;
 import com.example.commerce.tenant.TenantContext;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,31 +48,10 @@ public class ProductService {
             );
         }
 
-        boolean tenantHasProducts =
-                repository.existsByTenantId(TenantContext.getTenantId());
-
-        if (!tenantHasProducts) {
-            throw new RuntimeException(
-                    "No products available for this tenant"
-            );
-        }
         Sort sort = Sort.by(direction, sortBy.getField());
 
-        Page<ProductResponse> page = repository
-                .findByFilter(filter, limit, offset, sort)
+        return repository.findByFilter(filter, limit, offset, sort)
                 .map(this::toResponse);
-
-        // ✅ SAFE check — no security interference
-        if (page.getTotalElements() == 0 && offset == 0) {
-            throw new ProductNotAvailableException(
-                    "No products available for this tenant"
-            );
-        }
-
-        return page;
-//        return repository.findByFilter(filter, limit, offset, sort)
-//                .map(this::toResponse);
-
     }
 
     private ProductResponse toResponse(Product product) {

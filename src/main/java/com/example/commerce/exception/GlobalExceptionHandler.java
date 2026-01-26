@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -99,6 +100,17 @@ public class GlobalExceptionHandler {
                         "INTERNAL_SERVER_ERROR",
                         ex.getMessage(),
                         System.currentTimeMillis()
+                ));
+    }
+
+    @ExceptionHandler(ProductNotAvailableException.class)
+    public ResponseEntity<Map<String, String>> handleProductNotAvailable(
+            ProductNotAvailableException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of(
+                        "error", ex.getMessage()
                 ));
     }
 }

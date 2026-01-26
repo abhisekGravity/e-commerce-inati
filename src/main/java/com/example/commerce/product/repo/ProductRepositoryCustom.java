@@ -13,4 +13,6 @@ public interface ProductRepositoryCustom {
             int offset,
             Sort sort
     );
+
+    boolean existsByTenantId(String tenantId);
 }

@@ -1,5 +1,7 @@
 package com.example.commerce.product;
 
+import com.example.commerce.exception.product.InvalidProductRequestException;
+import com.example.commerce.exception.product.ProductAlreadyExistsException;
 import com.example.commerce.product.dto.*;
 import com.example.commerce.product.repo.ProductRepository;
 import com.example.commerce.tenant.TenantContext;
@@ -8,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +24,7 @@ public class ProductService {
         String tenantId = TenantContext.getTenantId();
 
         if (repository.existsByTenantIdAndSku(tenantId, request.getSku())) {
-            throw new IllegalArgumentException("SKU already exists for tenant");
+            throw new ProductAlreadyExistsException(request.getSku(), tenantId);
         }
 
         Product product = Product.builder()
@@ -40,19 +45,47 @@ public class ProductService {
             int offset
     ) {
 
-        if (filter.getMinPrice() != null &&
-                filter.getMaxPrice() != null &&
-                filter.getMinPrice().compareTo(filter.getMaxPrice()) > 0) {
-            throw new IllegalArgumentException(
-                    "minPrice cannot be greater than maxPrice"
-            );
-        }
+        validateProductRequest(filter, sortBy, limit, offset);
 
         Sort sort = Sort.by(direction, sortBy.getField());
 
         return repository.findByFilter(filter, limit, offset, sort)
                 .map(this::toResponse);
     }
+
+    private void validateProductRequest(
+            ProductFilter filter,
+            ProductSortField sortBy,
+            int limit,
+            int offset
+    ) {
+        if (filter.getMinPrice() != null && filter.getMinPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidProductRequestException("minPrice cannot be negative");
+        }
+
+        if (filter.getMaxPrice() != null && filter.getMaxPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidProductRequestException("maxPrice must be greater than zero");
+        }
+
+        if (filter.getMinPrice() != null && filter.getMaxPrice() != null &&
+                filter.getMinPrice().compareTo(filter.getMaxPrice()) > 0) {
+            throw new InvalidProductRequestException("minPrice cannot be greater than maxPrice");
+        }
+
+        boolean validSort = Arrays.stream(ProductSortField.values())
+                .anyMatch(f -> f.name().equals(sortBy.name()));
+        if (!validSort) {
+            throw new InvalidProductRequestException("Invalid sort field. Allowed fields: " +
+                    Arrays.toString(ProductSortField.values()));
+        }
+
+        if (offset < 0) {
+            throw new InvalidProductRequestException("offset cannot be negative");
+        }
+        if (limit <= 0) {
+            throw new InvalidProductRequestException("limit must be greater than zero");
+        }
+        }
 
     private ProductResponse toResponse(Product product) {
         return ProductResponse.builder()

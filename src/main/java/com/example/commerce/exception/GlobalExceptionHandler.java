@@ -4,6 +4,7 @@ import com.example.commerce.common.ApiErrorResponse;
 import com.example.commerce.exception.auth.AuthException;
 import com.example.commerce.exception.dscountRule.DiscountRuleException;
 import com.example.commerce.exception.order.OrderException;
+import com.example.commerce.exception.product.InvalidProductRequestException;
 import com.example.commerce.exception.product.ProductException;
 import com.example.commerce.exception.tenant.TenantException;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 
 @RestControllerAdvice
@@ -32,7 +36,7 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse(
                         "VALIDATION_ERROR",
                         errors,
-                        System.currentTimeMillis()
+                        Instant.now().toEpochMilli()
                 ));
     }
 
@@ -43,7 +47,7 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse(
                         "TENANT_ERROR",
                         ex.getMessage(),
-                        System.currentTimeMillis()
+                        Instant.now().toEpochMilli()
                 ));
     }
 
@@ -54,7 +58,7 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse(
                         "AUTH_ERROR",
                         ex.getMessage(),
-                        System.currentTimeMillis()
+                        Instant.now().toEpochMilli()
                 ));
     }
 
@@ -65,7 +69,7 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse(
                         "PRODUCT_ERROR",
                         ex.getMessage(),
-                        System.currentTimeMillis()
+                        Instant.now().toEpochMilli()
                 ));
     }
 
@@ -76,7 +80,7 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse(
                         "DISCOUNT_RULE_ERROR",
                         ex.getMessage(),
-                        System.currentTimeMillis()
+                        Instant.now().toEpochMilli()
                 ));
     }
 
@@ -87,8 +91,32 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse(
                         "ORDER_ERROR",
                         ex.getMessage(),
-                        System.currentTimeMillis()
+                        Instant.now().toEpochMilli()
                 ));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleEnumMismatch(MethodArgumentTypeMismatchException ex) {
+        if (ex.getRequiredType() != null && ex.getRequiredType().isEnum()) {
+
+            Object[] constants = ex.getRequiredType().getEnumConstants();
+            String allowedValues = Arrays.toString(constants);
+            String value = ex.getValue() != null ? ex.getValue().toString() : "null";
+
+            InvalidProductRequestException productEx = new InvalidProductRequestException(
+                    "Invalid value '" + value + "' for parameter '" + ex.getName() +
+                            "'. Allowed values: " + allowedValues
+            );
+
+            return handleProduct(productEx);
+        }
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                "INVALID_REQUEST",
+                ex.getMessage(),
+                Instant.now().toEpochMilli()
+        );
+        return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(Exception.class)
@@ -98,7 +126,7 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse(
                         "INTERNAL_SERVER_ERROR",
                         ex.getMessage(),
-                        System.currentTimeMillis()
+                        Instant.now().toEpochMilli()
                 ));
     }
 }

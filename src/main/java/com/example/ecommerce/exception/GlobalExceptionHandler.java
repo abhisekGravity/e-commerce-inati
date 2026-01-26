@@ -2,7 +2,7 @@ package com.example.ecommerce.exception;
 
 import com.example.ecommerce.common.response.ApiErrorResponse;
 import com.example.ecommerce.exception.auth.AuthException;
-import com.example.ecommerce.exception.dscountRule.DiscountRuleException;
+import com.example.ecommerce.exception.cart.CartException;
 import com.example.ecommerce.exception.order.OrderException;
 import com.example.ecommerce.exception.product.InvalidProductRequestException;
 import com.example.ecommerce.exception.product.ProductException;
@@ -73,12 +73,12 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(DiscountRuleException.class)
-    public ResponseEntity<ApiErrorResponse> handleDiscountRule(DiscountRuleException ex) {
+    @ExceptionHandler(CartException.class)
+    public ResponseEntity<ApiErrorResponse> handleDiscountRule(CartException ex) {
         return ResponseEntity
                 .status(ex.getStatus())
                 .body(new ApiErrorResponse(
-                        "DISCOUNT_RULE_ERROR",
+                        "CART_ERROR",
                         ex.getMessage(),
                         Instant.now().toEpochMilli()
                 ));

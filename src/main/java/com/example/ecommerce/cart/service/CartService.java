@@ -3,6 +3,9 @@ package com.example.ecommerce.cart.service;
 import com.example.ecommerce.cart.domain.Cart;
 import com.example.ecommerce.cart.domain.CartItem;
 import com.example.ecommerce.cart.repository.CartRepository;
+import com.example.ecommerce.exception.cart.ActiveCartNotFoundException;
+import com.example.ecommerce.exception.cart.ProductNotFoundForCartException;
+import com.example.ecommerce.exception.cart.InsufficientInventoryException;
 import com.example.ecommerce.pricing.dto.PricingContext;
 import com.example.ecommerce.pricing.service.PricingService;
 import com.example.ecommerce.product.domain.Product;
@@ -29,7 +32,7 @@ public class CartService {
 
         Product product = productRepository
                 .findByTenantIdAndSku(tenantId, sku)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new ProductNotFoundForCartException(sku));
 
         validateInventory(product, quantity);
 
@@ -74,12 +77,15 @@ public class CartService {
                         TenantContext.getTenantId(),
                         userId
                 )
-                .orElseThrow(() -> new IllegalStateException("No active cart"));
+                .orElseThrow(ActiveCartNotFoundException::new);
     }
 
     private void validateInventory(Product product, int quantity) {
         if (product.getInventory() < quantity) {
-            throw new IllegalStateException("Insufficient inventory");
+            throw new InsufficientInventoryException(
+                    quantity,
+                    product.getInventory()
+            );
         }
     }
 }

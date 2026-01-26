@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PricingEngine {
 
-    private final List<PricingStrategy> strategies; // Injected by Spring
+    private final List<PricingStrategy> strategies;
 
     public BigDecimal calculatePrice(PricingContext context) {
         BigDecimal price = context.basePrice();

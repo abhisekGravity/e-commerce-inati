@@ -1,12 +1,12 @@
-package com.example.ecommerce.exception.dscountRule;
+package com.example.ecommerce.exception.cart;
 
 import org.springframework.http.HttpStatus;
 
-public abstract class DiscountRuleException extends RuntimeException {
+public abstract class CartException extends RuntimeException {
 
     private final HttpStatus status;
 
-    protected DiscountRuleException(String message, HttpStatus status) {
+    protected CartException(String message, HttpStatus status) {
         super(message);
         this.status = status;
     }

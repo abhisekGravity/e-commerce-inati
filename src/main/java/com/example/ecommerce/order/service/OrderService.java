@@ -3,6 +3,7 @@ package com.example.ecommerce.order.service;
 import com.example.ecommerce.cart.domain.Cart;
 import com.example.ecommerce.cart.domain.CartItem;
 import com.example.ecommerce.cart.repository.CartRepository;
+import com.example.ecommerce.exception.order.*;
 import com.example.ecommerce.order.domain.Order;
 import com.example.ecommerce.order.domain.OrderItem;
 import com.example.ecommerce.order.domain.OrderStatus;
@@ -52,10 +53,10 @@ public class OrderService {
         // 2️⃣ Fetch active cart
         Cart cart = cartRepository
                 .findByTenantIdAndUserIdAndActiveTrue(tenantId, userId)
-                .orElseThrow(() -> new IllegalStateException("No active cart found"));
+                .orElseThrow(ActiveCartNotFoundForOrderException::new);
 
         if (cart.getItems().isEmpty()) {
-            throw new IllegalStateException("Cart is empty");
+            throw new EmptyCartException();
         }
 
         // 3️⃣ Atomic inventory deduction (optimistic locking)
@@ -63,14 +64,10 @@ public class OrderService {
 
             Product product = productRepository
                     .findByTenantIdAndSku(tenantId, item.getSku())
-                    .orElseThrow(() ->
-                            new IllegalStateException("Product not found: " + item.getSku())
-                    );
+                    .orElseThrow(() -> new ProductNotFoundForOrderException(item.getSku()));
 
             if (product.getInventory() < item.getQuantity()) {
-                throw new IllegalStateException(
-                        "Insufficient inventory for SKU: " + item.getSku()
-                );
+                throw new InsufficientInventoryForOrderException(item.getSku());
             }
 
             product.setInventory(
@@ -80,9 +77,7 @@ public class OrderService {
             try {
                 productRepository.save(product);
             } catch (OptimisticLockingFailureException ex) {
-                throw new IllegalStateException(
-                        "Concurrent inventory update detected for SKU: " + item.getSku()
-                );
+                throw new InventoryConcurrencyException(item.getSku());
             }
         }
 

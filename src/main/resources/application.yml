@@ -16,3 +16,9 @@ logging:
     org.springframework.data.mongodb: DEBUG
     org.springframework.boot.autoconfigure: DEBUG
     org.springframework.security: DEBUG
+
+springdoc:
+  swagger-ui:
+    operationsSorter: alpha
+    tagsSorter: alpha
+    doc-expansion: none

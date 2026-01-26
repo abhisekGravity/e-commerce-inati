@@ -11,7 +11,7 @@ public class RateLimitService {
 
     private final Map<String, RequestCounter> requestMap = new ConcurrentHashMap<>();
 
-    private final int MAX_REQUESTS = 1;
+    private final int MAX_REQUESTS = 10;
     private final long WINDOW_MS = 60_000;
 
     public boolean allowRequest(String tenantId, String clientIp, String apiPath) {

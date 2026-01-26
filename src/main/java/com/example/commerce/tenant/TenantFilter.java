@@ -19,7 +19,9 @@ public class TenantFilter extends OncePerRequestFilter {
 
     private static final Set<String> PUBLIC_ENDPOINTS = Set.of(
             "/tenants",
-            "/error"
+            "/error",
+            "/swagger-ui",
+            "/v3/api-docs"
     );
 
     @Override

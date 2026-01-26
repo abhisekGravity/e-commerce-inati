@@ -41,12 +41,12 @@ public class CartService {
                         .build()
                 );
 
-        PricingContext pricingContext = new PricingContext(
-                tenantId,
-                sku,
-                product.getBasePrice(),
-                product.getInventory()
-        );
+        PricingContext pricingContext = PricingContext.builder()
+                .tenantId(tenantId)
+                .sku(sku)
+                .basePrice(product.getBasePrice())
+                .inventory(product.getInventory())
+                .build();
 
         BigDecimal finalUnitPrice = pricingService.getFinalPrice(pricingContext);
 

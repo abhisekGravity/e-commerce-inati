@@ -80,6 +80,18 @@ public class CartService {
                 .orElseThrow(ActiveCartNotFoundException::new);
     }
 
+    public void clearCart(String userId) {
+        Cart cart = cartRepository
+                .findByTenantIdAndUserIdAndActiveTrue(
+                        TenantContext.getTenantId(),
+                        userId
+                )
+                .orElseThrow(ActiveCartNotFoundException::new);
+
+        cart.setActive(false);
+        cartRepository.save(cart);
+    }
+
     private void validateInventory(Product product, int quantity) {
         if (product.getInventory() < quantity) {
             throw new InsufficientInventoryException(

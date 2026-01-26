@@ -50,4 +50,8 @@ public class Cart extends TenantAwareEntity {
                 .map(CartItem::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    public boolean isEmpty() {
+        return items == null || items.isEmpty();
+    }
 }

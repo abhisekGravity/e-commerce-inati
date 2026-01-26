@@ -2,116 +2,97 @@ package com.example.ecommerce.order.service;
 
 import com.example.ecommerce.cart.domain.Cart;
 import com.example.ecommerce.cart.domain.CartItem;
-import com.example.ecommerce.cart.repository.CartRepository;
-import com.example.ecommerce.exception.order.*;
+import com.example.ecommerce.cart.service.CartService;
 import com.example.ecommerce.order.domain.Order;
 import com.example.ecommerce.order.domain.OrderItem;
 import com.example.ecommerce.order.domain.OrderStatus;
 import com.example.ecommerce.order.repository.OrderRepository;
-import com.example.ecommerce.product.domain.Product;
 import com.example.ecommerce.product.repo.ProductRepository;
 import com.example.ecommerce.security.util.SecurityUtil;
 import com.example.ecommerce.tenant.context.TenantContext;
+import com.mongodb.client.result.UpdateResult;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final CartRepository cartRepository;
-    private final OrderRepository orderRepository;
+    private final CartService cartService;
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
 
-    /**
-     * Idempotent + transactional order placement
-     */
-    @Transactional
-    public Order placeOrder( String idempotencyKey) {
+    public Order placeOrder(String idempotencyKey) {
 
+        String tenantId = TenantContext.getTenantId();
         String userId = SecurityUtil.getCurrentUserId();
-        String tenantId = TenantContext.getTenantId();
 
-        // 1️⃣ Idempotency check (VERY IMPORTANT)
-        return orderRepository
-                .findByTenantIdAndIdempotencyKey(tenantId, idempotencyKey)
-                .orElseGet(() -> createOrderInternal(userId, idempotencyKey));
-    }
+        // 1️⃣ Idempotency
+        Optional<Order> existing = orderRepository
+                .findByTenantIdAndIdempotencyKey(tenantId, idempotencyKey);
 
-    /**
-     * Internal order creation logic
-     * Executed only once per idempotency key
-     */
-    private Order createOrderInternal(String userId, String idempotencyKey) {
-
-        String tenantId = TenantContext.getTenantId();
-
-        // 2️⃣ Fetch active cart
-        Cart cart = cartRepository
-                .findByTenantIdAndUserIdAndActiveTrue(tenantId, userId)
-                .orElseThrow(ActiveCartNotFoundForOrderException::new);
-
-        if (cart.getItems().isEmpty()) {
-            throw new EmptyCartException();
+        if (existing.isPresent()) {
+            return existing.get();
         }
 
-        // 3️⃣ Atomic inventory deduction (optimistic locking)
+        // 2️⃣ Fetch cart
+        Cart cart = cartService.getActiveCart();
+        if (cart.isEmpty()) {
+            throw new IllegalStateException("Cart is empty");
+        }
+
+        List<OrderItem> orderItems = new ArrayList<>();
+        BigDecimal total = BigDecimal.ZERO;
+
+        // 3️⃣ Atomic inventory lock
         for (CartItem item : cart.getItems()) {
 
-            Product product = productRepository
-                    .findByTenantIdAndSku(tenantId, item.getSku())
-                    .orElseThrow(() -> new ProductNotFoundForOrderException(item.getSku()));
+            UpdateResult result = productRepository
+                    .decrementInventory(item.getProductId(), item.getQuantity());
 
-            if (product.getInventory() < item.getQuantity()) {
-                throw new InsufficientInventoryForOrderException(item.getSku());
+            if (result.getModifiedCount() == 0) {
+                throw new IllegalStateException(
+                        "Insufficient stock for SKU: " + item.getSku()
+                );
             }
 
-            product.setInventory(
-                    product.getInventory() - item.getQuantity()
-            );
+            // 4️⃣ Price snapshot
+            OrderItem orderItem = OrderItem.builder()
+                    .productId(item.getProductId())
+                    .sku(item.getSku())
+                    .name(item.getName())
+                    .quantity(item.getQuantity())
+                    .unitPrice(item.getUnitPrice())
+                    .totalPrice(
+                            item.getUnitPrice()
+                                    .multiply(BigDecimal.valueOf(item.getQuantity()))
+                    )
+                    .build();
 
-            try {
-                productRepository.save(product);
-            } catch (OptimisticLockingFailureException ex) {
-                throw new InventoryConcurrencyException(item.getSku());
-            }
+            orderItems.add(orderItem);
+            total = total.add(orderItem.getTotalPrice());
         }
 
-        // 4️⃣ Convert Cart → Order snapshot
-        List<OrderItem> orderItems = cart.getItems().stream()
-                .map(this::toOrderItem)
-                .toList();
-
+        // 5️⃣ Save order
         Order order = Order.builder()
+                .tenantId(tenantId)
                 .userId(userId)
                 .idempotencyKey(idempotencyKey)
                 .status(OrderStatus.CREATED)
                 .items(orderItems)
-                .totalAmount(cart.getTotalPrice())
+                .totalAmount(total)
                 .build();
 
-        // 5️⃣ Persist order
-        Order savedOrder = orderRepository.save(order);
+        orderRepository.save(order);
 
-        // 6️⃣ Deactivate cart
-        cart.setActive(false);
-        cartRepository.save(cart);
+        // 6️⃣ Clear cart
+        cartService.clearCart(userId);
 
-        return savedOrder;
-    }
-
-    private OrderItem toOrderItem(CartItem item) {
-        return OrderItem.builder()
-                .productId(item.getProductId())
-                .sku(item.getSku())
-                .name(item.getName())
-                .quantity(item.getQuantity())
-                .unitPrice(item.getUnitPrice())
-                .totalPrice(item.getTotalPrice())
-                .build();
+        return order;
     }
 }

@@ -8,6 +8,11 @@ import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 
+import com.mongodb.client.result.UpdateResult;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Update;
+
+
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -37,5 +42,15 @@ public class ProductRepositoryCustomImpl
                 PageRequest.of(offset / limit, limit, sort);
 
         return new PageImpl<>(products, pageable, total);
+    }
+
+    @Override
+    public UpdateResult decrementInventory(String productId, int quantity) {
+        Query query = new Query(Criteria.where("_id").is(productId)
+                .and("inventory").gte(quantity));
+
+        Update update = new Update().inc("inventory", -quantity);
+
+        return mongoTemplate.updateFirst(query, update, Product.class);
     }
 }

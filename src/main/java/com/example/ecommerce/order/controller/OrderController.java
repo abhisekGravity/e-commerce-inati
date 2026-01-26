@@ -12,12 +12,6 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    /**
-     * Place order (idempotent)
-     *
-     * Required headers:
-     * - Idempotency-Key
-     */
     @PostMapping
     public Order placeOrder(
             @RequestHeader("Idempotency-Key") String idempotencyKey

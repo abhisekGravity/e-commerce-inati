@@ -1,4 +1,4 @@
-package com.example.commerce.config;
+package com.example.commerce.common.config;
 
 import com.example.commerce.security.jwt.JwtAuthenticationFilter;
 import com.example.commerce.tenant.TenantFilter;

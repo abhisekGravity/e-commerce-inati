@@ -4,6 +4,7 @@ import com.example.commerce.common.TenantAwareEntity;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -27,4 +28,7 @@ public class Product extends TenantAwareEntity {
     private BigDecimal basePrice;
 
     private int inventory;
+
+    @Version
+    private Long version;
 }

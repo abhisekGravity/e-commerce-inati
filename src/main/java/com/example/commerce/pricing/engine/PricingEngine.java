@@ -1,0 +1,34 @@
+package com.example.commerce.pricing.engine;
+
+import com.example.commerce.pricing.dto.PricingContext;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Component
+public class PricingEngine {
+
+    private final List<PricingStrategy> strategies;
+
+    public PricingEngine(List<PricingStrategy> strategies) {
+        this.strategies = strategies;
+    }
+
+    public BigDecimal calculatePrice(PricingContext context) {
+        BigDecimal price = context.basePrice();
+
+        for (PricingStrategy strategy : strategies) {
+            if (strategy.isApplicable(context)) {
+                price = strategy.apply(new PricingContext(
+                        context.tenantId(),
+                        context.sku(),
+                        price,
+                        context.inventory()
+                ));
+            }
+        }
+
+        return price;
+    }
+}

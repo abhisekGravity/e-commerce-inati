@@ -165,7 +165,7 @@ server:
 logging:
   level:
     root: INFO
-    org.springframework.web: DEBUG
+    org.springframework.web: INFO
 ```
 
 ---

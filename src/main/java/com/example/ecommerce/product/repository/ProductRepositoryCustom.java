@@ -1,4 +1,4 @@
-package com.example.ecommerce.product.repo;
+package com.example.ecommerce.product.repository;
 
 import com.example.ecommerce.product.domain.Product;
 import com.example.ecommerce.product.dto.ProductFilter;

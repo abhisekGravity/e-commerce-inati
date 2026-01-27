@@ -1,7 +1,7 @@
-package com.example.ecommerce.product.repo;
+package com.example.ecommerce.product.repository;
 
 import com.example.ecommerce.product.domain.Product;
-import com.example.ecommerce.product.repo.query.ProductQueryBuilder;
+import com.example.ecommerce.product.repository.query.ProductQueryBuilder;
 import com.example.ecommerce.product.dto.ProductFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;

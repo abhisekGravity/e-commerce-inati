@@ -5,7 +5,7 @@ import com.example.ecommerce.exception.product.ProductAlreadyExistsException;
 import com.example.ecommerce.product.domain.Product;
 import com.example.ecommerce.product.domain.ProductSortField;
 import com.example.ecommerce.product.dto.*;
-import com.example.ecommerce.product.repo.ProductRepository;
+import com.example.ecommerce.product.repository.ProductRepository;
 import com.example.ecommerce.tenant.context.TenantContext;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

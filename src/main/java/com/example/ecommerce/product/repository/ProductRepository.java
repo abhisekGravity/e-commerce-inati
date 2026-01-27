@@ -1,9 +1,7 @@
-package com.example.ecommerce.product.repo;
+package com.example.ecommerce.product.repository;
 
 import com.example.ecommerce.product.domain.Product;
-import com.mongodb.client.result.UpdateResult;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 
 import java.util.Optional;
 

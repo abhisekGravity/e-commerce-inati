@@ -7,7 +7,7 @@ import com.example.ecommerce.order.domain.Order;
 import com.example.ecommerce.order.domain.OrderItem;
 import com.example.ecommerce.order.domain.OrderStatus;
 import com.example.ecommerce.order.repository.OrderRepository;
-import com.example.ecommerce.product.repo.ProductRepository;
+import com.example.ecommerce.product.repository.ProductRepository;
 import com.example.ecommerce.security.util.SecurityUtil;
 import com.example.ecommerce.tenant.context.TenantContext;
 import com.mongodb.client.result.UpdateResult;
@@ -32,7 +32,6 @@ public class OrderService {
         String tenantId = TenantContext.getTenantId();
         String userId = SecurityUtil.getCurrentUserId();
 
-        // 1️⃣ Idempotency
         Optional<Order> existing = orderRepository
                 .findByTenantIdAndIdempotencyKey(tenantId, idempotencyKey);
 
@@ -40,7 +39,6 @@ public class OrderService {
             return existing.get();
         }
 
-        // 2️⃣ Fetch cart
         Cart cart = cartService.getActiveCart();
         if (cart.isEmpty()) {
             throw new IllegalStateException("Cart is empty");
@@ -49,7 +47,6 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
 
-        // 3️⃣ Atomic inventory lock
         for (CartItem item : cart.getItems()) {
 
             UpdateResult result = productRepository
@@ -61,7 +58,6 @@ public class OrderService {
                 );
             }
 
-            // 4️⃣ Price snapshot
             OrderItem orderItem = OrderItem.builder()
                     .productId(item.getProductId())
                     .sku(item.getSku())
@@ -78,7 +74,6 @@ public class OrderService {
             total = total.add(orderItem.getTotalPrice());
         }
 
-        // 5️⃣ Save order
         Order order = Order.builder()
                 .tenantId(tenantId)
                 .userId(userId)
@@ -90,7 +85,7 @@ public class OrderService {
 
         orderRepository.save(order);
 
-        // 6️⃣ Clear cart
+
         cartService.clearCart(userId);
 
         return order;

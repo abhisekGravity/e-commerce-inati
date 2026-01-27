@@ -1,4 +1,4 @@
-package com.example.ecommerce.product.repo.query;
+package com.example.ecommerce.product.repository.query;
 
 import com.example.ecommerce.product.dto.ProductFilter;
 import com.example.ecommerce.tenant.context.TenantContext;

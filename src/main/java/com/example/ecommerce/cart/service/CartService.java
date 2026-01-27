@@ -9,7 +9,7 @@ import com.example.ecommerce.exception.cart.InsufficientInventoryException;
 import com.example.ecommerce.pricing.dto.PricingContext;
 import com.example.ecommerce.pricing.service.PricingService;
 import com.example.ecommerce.product.domain.Product;
-import com.example.ecommerce.product.repo.ProductRepository;
+import com.example.ecommerce.product.repository.ProductRepository;
 import com.example.ecommerce.security.util.SecurityUtil;
 import com.example.ecommerce.tenant.context.TenantContext;
 import lombok.RequiredArgsConstructor;

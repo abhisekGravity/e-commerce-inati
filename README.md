@@ -148,15 +148,6 @@ logging:
     org.springframework.web: INFO
 ```
 
-## Testing
-
-```bash
-# Windows
-.\mvnw.cmd test
-
-# Linux/Mac
-./mvnw test
-```
 
 ## Postman Collection
 

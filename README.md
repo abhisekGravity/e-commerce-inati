@@ -1,83 +1,72 @@
-# 🛒 Multi-Tenant E-Commerce API
+# Multi-Tenant E-Commerce API
 
-A robust, multi-tenant e-commerce backend built with **Spring Boot 3.2**, **MongoDB**, and **JWT Authentication**. This project provides RESTful APIs for managing tenants, products, shopping carts, orders, and user authentication.
+A robust, multi-tenant e-commerce backend built with Spring Boot 3.2, MongoDB, and JWT Authentication. Provides RESTful APIs for tenants, products, shopping carts, orders, and user authentication.
 
----
+## Features
 
-## ✨ Features
+* Multi-Tenancy Support: Isolated data per tenant
+* JWT Authentication: Secure login/register with access and refresh tokens
+* Product Management: CRUD operations with filtering, sorting, and pagination
+* Shopping Cart: Add/remove items with inventory validation
+* Order Processing: Idempotent order placement with transactional support
+* Rate Limiting: Built-in request rate limiting
+* API Documentation: Swagger UI integration
+* Request Logging: Comprehensive request/response logging
 
-- **Multi-Tenancy Support** - Isolated data per tenant with tenant-aware entities
-- **JWT Authentication** - Secure login/register with access and refresh tokens
-- **Product Management** - CRUD operations with filtering, sorting, and pagination
-- **Shopping Cart** - Add/remove items with inventory validation
-- **Order Processing** - Idempotent order placement with transactional support
-- **Rate Limiting** - Built-in request rate limiting
-- **API Documentation** - Swagger UI integration
-- **Request Logging** - Comprehensive request/response logging
+## Tech Stack
 
----
+| Technology        | Version | Purpose                        |
+| ----------------- | ------- | ------------------------------ |
+| Java              | 17      | Language                       |
+| Spring Boot       | 3.2.4   | Framework                      |
+| MongoDB           | -       | Database                       |
+| Spring Security   | -       | Authentication & Authorization |
+| JWT (jjwt)        | 0.11.5  | Token-based auth               |
+| Lombok            | -       | Boilerplate reduction          |
+| SpringDoc OpenAPI | 2.3.0   | API Documentation              |
 
-## 🛠️ Tech Stack
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Java | 17 | Language |
-| Spring Boot | 3.2.4 | Framework |
-| MongoDB | - | Database |
-| Spring Security | - | Authentication & Authorization |
-| JWT (jjwt) | 0.11.5 | Token-based auth |
-| Lombok | - | Boilerplate reduction |
-| SpringDoc OpenAPI | 2.3.0 | API Documentation |
-
----
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- **Java 17** or higher
-- **MongoDB** running on `localhost:27017`
-- **Maven** (or use the included wrapper)
+* Java 17 or higher
+* MongoDB running on localhost:27017
+* Maven (or use the included wrapper)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/e-commerce-inati.git
-   cd e-commerce-inati
-   ```
+```bash
+git clone https://github.com/your-username/e-commerce-inati.git
+cd e-commerce-inati
+```
 
-2. **Start MongoDB**
-   ```bash
-   # Using Docker
-   docker run -d -p 27017:27017 --name mongodb mongo:latest
-   
-   # Or start your local MongoDB service
-   ```
+Start MongoDB:
 
-3. **Run the application**
-   ```bash
-   # Using Maven Wrapper (Windows)
-   .\mvnw.cmd spring-boot:run
-   
-   # Using Maven Wrapper (Linux/Mac)
-   ./mvnw spring-boot:run
-   
-   # Or using Maven directly
-   mvn spring-boot:run
-   ```
+```bash
+# Using Docker
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+```
 
-4. **Access the application**
-   - **API Base URL**: `http://localhost:8080`
-   - **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
+Run the application:
 
----
+```bash
+# Windows
+.\mvnw.cmd spring-boot:run
 
-## 📁 Project Structure
+# Linux/Mac
+./mvnw spring-boot:run
+```
+
+Access:
+
+* API Base URL: `http://localhost:8080`
+* Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+
+## Project Structure
 
 ```
 src/main/java/com/example/ecommerce/
-├── auth/           # Authentication (login, register, refresh, logout)
+├── auth/           # Authentication
 ├── cart/           # Shopping cart management
 ├── common/         # Shared configs, filters, rate limiting
 ├── exception/      # Global exception handling
@@ -90,68 +79,59 @@ src/main/java/com/example/ecommerce/
 └── User/           # User domain & repository
 ```
 
----
-
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register` | Register a new user |
-| POST | `/auth/login` | Login and get tokens |
-| POST | `/auth/refresh` | Refresh access token |
-| POST | `/auth/logout` | Logout user |
+
+| Method | Endpoint         | Description          |
+| ------ | ---------------- | -------------------- |
+| POST   | `/auth/register` | Register a new user  |
+| POST   | `/auth/login`    | Login and get tokens |
+| POST   | `/auth/refresh`  | Refresh access token |
+| POST   | `/auth/logout`   | Logout user          |
 
 ### Tenant Management
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/tenants/create` | Create a new tenant |
-| GET | `/tenants/getAll` | Get all tenants |
+
+| Method | Endpoint          | Description         |
+| ------ | ----------------- | ------------------- |
+| POST   | `/tenants/create` | Create a new tenant |
+| GET    | `/tenants/getAll` | Get all tenants     |
 
 ### Products
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/products` | Create a new product |
-| GET | `/products` | List products with filters |
+
+| Method | Endpoint    | Description                |
+| ------ | ----------- | -------------------------- |
+| POST   | `/products` | Create a new product       |
+| GET    | `/products` | List products with filters |
 
 **Query Parameters for GET `/products`:**
-- `sku` - Filter by SKU
-- `name` - Filter by name
-- `minPrice` / `maxPrice` - Price range filter
-- `inStock` - Stock availability filter
-- `sortBy` - Sort by `PRICE`, `INVENTORY`, or `NAME`
-- `direction` - `ASC` or `DESC`
-- `limit` / `offset` - Pagination
+
+* sku, name, minPrice, maxPrice, inStock, sortBy (PRICE, INVENTORY, NAME), direction (ASC/DESC), limit, offset
 
 ### Shopping Cart
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/cart` | Get current cart |
-| POST | `/cart/add` | Add item to cart |
+
+| Method | Endpoint    | Description      |
+| ------ | ----------- | ---------------- |
+| GET    | `/cart`     | Get current cart |
+| POST   | `/cart/add` | Add item to cart |
 
 ### Orders
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/orders` | Place an order (requires `Idempotency-Key` header) |
 
----
+| Method | Endpoint  | Description                                        |
+| ------ | --------- | -------------------------------------------------- |
+| POST   | `/orders` | Place an order (requires `Idempotency-Key` header) |
 
-## 🔐 Authentication Flow
+## Authentication Flow
 
-1. **Register** a new user with email and password
-2. **Login** to receive an access token (and refresh token in cookie)
-3. Include the access token in the `Authorization` header:
-   ```
-   Authorization: Bearer <access_token>
-   ```
-4. **Refresh** the token when expired using the refresh token cookie
-5. **Logout** to invalidate the refresh token
+1. Register a new user with email and password
+2. Login to receive an access token (and refresh token in cookie)
+3. Include the access token in the `Authorization` header
+4. Refresh the token when expired using the refresh token cookie
+5. Logout to invalidate the refresh token
 
----
+## Configuration
 
-## ⚙️ Configuration
-
-Edit `src/main/resources/application.yml` to customize:
+Edit `src/main/resources/application.yml`:
 
 ```yaml
 spring:
@@ -168,11 +148,7 @@ logging:
     org.springframework.web: INFO
 ```
 
----
-
-## 🧪 Testing
-
-Run the test suite:
+## Testing
 
 ```bash
 # Windows
@@ -182,39 +158,27 @@ Run the test suite:
 ./mvnw test
 ```
 
----
+## Postman Collection
 
-## 📬 Postman Collection
+Included in project root: `postman_collection.json`
 
-A Postman collection is included in the project root: `postman_collection.json`
+## API Documentation
 
-Import it into Postman to quickly test all available endpoints.
+* Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+* OpenAPI JSON: `openapi.json`
 
----
-
-## 📖 API Documentation
-
-Full OpenAPI specification is available at:
-- **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
-- **OpenAPI JSON**: `openapi.json` (included in project root)
-
----
-
-## 👤 Author
+## Author
 
 **Abhisek Nayak**
-- Email: abhiseknayak84@gmail.com
-- Portfolio: [port-folio-iota-seven.vercel.app](http://port-folio-iota-seven.vercel.app/)
 
----
+* Email: [abhiseknayak84@gmail.com](mailto:abhiseknayak84@gmail.com)
+* Portfolio: [port-folio-iota-seven.vercel.app](http://port-folio-iota-seven.vercel.app/)
 
-## 📄 License
+## License
 
-This project is licensed under the terms specified in the LICENSE file.
+Licensed under the terms in the LICENSE file.
 
----
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)

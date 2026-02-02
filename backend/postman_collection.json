@@ -1,0 +1,433 @@
+{
+  "info": {
+    "_postman_id": "831fdb9b-4fca-4b83-924f-27d5a40c359b",
+    "name": "Inati E-commerce assignment",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "46864547",
+    "_collection_link": "https://go.postman.co/collection/46864547-831fdb9b-4fca-4b83-924f-27d5a40c359b?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-tenant-slug",
+                "value": "call_me"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"a@test.com\",\"password\":\"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-tenant-slug",
+                "value": "tenant1"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"a@test.com\",\"password\":\"pass123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-tenant-slug",
+                "value": "tenant1"
+              },
+              {
+                "key": "Cookie",
+                "value": "refresh_token=Njk2ZmJjYzdlMWVkYjgxMjI3ZjE2OTc1OjQ0MDczMTI0MzIzMTAw"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/auth/refresh",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Log out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "refresh_token=Njk3MjQ3YWYyOTE1Mzk4YmU3MmZlYmJkOjE2NTcyODczMDY4NTAwMA%3D%3D"
+              },
+              {
+                "key": "x-tenant-slug",
+                "value": "call_me",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/auth/logout",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "Create product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-tenant-slug",
+                "value": "call_me"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTczYTBiM2RlMTVmMDBhOWY4ODg0ZGQiLCJ0ZW5hbnRJZCI6IjY5NzM5ZjQxNWYxMTdkNDFiMTg0MzQ5NCIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzY5MjQyMzg5LCJleHAiOjE3NjkyNDk1ODl9.J6o4avGEQv9ZHXnO1T_DVY57gjfQ6rJv8UPZTe8P0kqtQH0qijZtrm8ljOEuQwPZwD28IoMyB8gyDq5KBWrQjZHgRdX_3Yz675Zzmvu33UxozK5k88fd_ZMQ38ARAm2vtWSjtwTpO86NwK_zT3f1X6X22OflDv8jZ-a6GMeF12oKW1VhtYdc5zHTRviKMX1NrwyRFU7Fd_xXLiwfWQAipXOMAh2mEhn8nmwZ9NwHvJ07GPm9tTTDFYRe_UQ_ibSdZY2Vje9CG5R-gDPln2TdQvHDtIzsv6LaSoBl_9AyTKRuy4oBQ_K_Vy3XSzMYxTCm0zImo12tM8BuSY3rtL4VGQ"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"SKU-3\",\n  \"name\": \"Google\",\n  \"basePrice\": 500,\n  \"inventory\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List products",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTczYTBiM2RlMTVmMDBhOWY4ODg0ZGQiLCJ0ZW5hbnRJZCI6IjY5NzM5ZjQxNWYxMTdkNDFiMTg0MzQ5NCIsInRva2VuVmVyc2lvbiI6MiwiaWF0IjoxNzY5MjUyNDQwLCJleHAiOjE3NjkyNTk2NDB9.BvvI0R7gKLt2-brHoqY_9PsA7--swHGeHmk7P0tNtRz94dnyV1gQFXLi1q3ThlMSASiyGNgcz_ZvtkfvxKh6J1MsOjV3KaQBUAzkHTWNVVgSNQNKHCairP8B2CSH7Uod9QLZpSV0ghBZI1SemaoAVOiGRlcWNhYABNjRCThPd2OmQ-w3dd4iN5uxLLX8e5jsdwHyx-Cqhk8VuEQ8mutSI8N7XX31R250Wd1Iy1NjEbYR_-S35f0CRaDsT0xpIba5USLo0EiOQ7lv8aVZbd94iVBzmjPm1R2mT0gVZ54HtxBaPVgQC-pRGN6sIa5wWqjSkXgx22pD98uFDp4rEO3kRA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-tenant-slug",
+                "value": "call_me"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTczYTBiM2RlMTVmMDBhOWY4ODg0ZGQiLCJ0ZW5hbnRJZCI6IjY5NzM5ZjQxNWYxMTdkNDFiMTg0MzQ5NCIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzY5MjQyMzg5LCJleHAiOjE3NjkyNDk1ODl9.J6o4avGEQv9ZHXnO1T_DVY57gjfQ6rJv8UPZTe8P0kqtQH0qijZtrm8ljOEuQwPZwD28IoMyB8gyDq5KBWrQjZHgRdX_3Yz675Zzmvu33UxozK5k88fd_ZMQ38ARAm2vtWSjtwTpO86NwK_zT3f1X6X22OflDv8jZ-a6GMeF12oKW1VhtYdc5zHTRviKMX1NrwyRFU7Fd_xXLiwfWQAipXOMAh2mEhn8nmwZ9NwHvJ07GPm9tTTDFYRe_UQ_ibSdZY2Vje9CG5R-gDPln2TdQvHDtIzsv6LaSoBl_9AyTKRuy4oBQ_K_Vy3XSzMYxTCm0zImo12tM8BuSY3rtL4VGQ"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/products?inStock=false&sortBy=INVENTORY&direction=DESC&limit=10&offset=0",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "sam",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "500",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "1000",
+                  "disabled": true
+                },
+                {
+                  "key": "inStock",
+                  "value": "false"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "INVENTORY"
+                },
+                {
+                  "key": "direction",
+                  "value": "DESC"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Add item to cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-tenant-slug",
+                "value": "call_me"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTczYTBiM2RlMTVmMDBhOWY4ODg0ZGQiLCJ0ZW5hbnRJZCI6IjY5NzM5ZjQxNWYxMTdkNDFiMTg0MzQ5NCIsInRva2VuVmVyc2lvbiI6MjMsImlhdCI6MTc2OTQ1MDMxNSwiZXhwIjoxNzY5NDU3NTE1fQ.nx7GT1k3JxHOJAkSL7ewA7MYQGldGoXigcNStKijUbIdjTukLOkb_XDywqEy229_5SqmQWqJwwYXSR_nrS3GrwiD1MkOXIV2N_bDQ5G1Zg0VfNF26PoFRGnPwAwk0dw486iEV44Ek8i1Cka1p-XYPJLUOzREwoC10bRosUUN4X3Wjg_tgeNxh6Sq1Xe-po0k0YnSC8Bw3IOmLssW-cH3CtBi92XkthbXqCRCquKaDHHIDO4wU4sNX2SS1aJcDTXqJY6Y8H0RO399PrGelJGRaG7mL68PSCdk2mSwlqaJBKUcUEnuAkkcYd4B95CYyhaygv82II3azsav1Bho3ZWERA"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "type": "text",
+                  "key": "sku",
+                  "value": "SKU-3"
+                },
+                {
+                  "type": "text",
+                  "key": "quantity",
+                  "value": "3"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/cart/add",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cart",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-tenant-slug",
+                "value": "call_me"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2OTczYTBiM2RlMTVmMDBhOWY4ODg0ZGQiLCJ0ZW5hbnRJZCI6IjY5NzM5ZjQxNWYxMTdkNDFiMTg0MzQ5NCIsInRva2VuVmVyc2lvbiI6MjQsImlhdCI6MTc2OTQ1MDcxNywiZXhwIjoxNzY5NDU3OTE3fQ.I2XHWCFxfiWMVXet_B83avPDmGsiWxuTDcIQK1MggzWZLeE_b5vzF3j9TZ8rb-NNAnMz097yZgOk_0PlktLIwcx1ovZlTWsWOImeTpHTZNnxkQs9MdosVu4NXoOdHIybp-Yws2Mk4UuNPthr1fSO45xiDA4Yi2P8wa1Xn7ooy5lx5rcSYv6N_J0Mz41SC63ha_uhM39s7mtj0eUv_taErLmGX6_seWTZXsmPK7OAGwzNSQr7si85CVq0wrbM8SZ1lOQqX9euaPM11Ko38MhY9WsyV3exzLiiiLQGH4Eu1GfuzDuofThPKuehJaDR9LLC8YJML4qdHcw_szjx96jl0Q"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/cart",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cart"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tenant",
+      "item": [
+        {
+          "name": "Create tenant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Call me\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/tenants/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "tenants",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all tenants",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/tenants/getAll",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "tenants",
+                "getAll"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "item": [
+        {
+          "name": "place order",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

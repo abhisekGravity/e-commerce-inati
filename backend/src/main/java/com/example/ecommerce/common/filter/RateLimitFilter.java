@@ -2,6 +2,7 @@ package com.example.ecommerce.common.filter;
 
 import com.example.ecommerce.common.rateLimit.RateLimitService;
 import com.example.ecommerce.common.response.ApiErrorResponse;
+import com.example.ecommerce.security.util.SecurityUtil;
 import com.example.ecommerce.tenant.context.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -33,8 +34,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String tenantId = TenantContext.getTenantId();
         String clientIp = request.getRemoteAddr();
         String apiPath = request.getRequestURI();
+        String userId = SecurityUtil.getCurrentUserId();
 
-        boolean allowed = rateLimitService.allowRequest(tenantId, clientIp, apiPath);
+        boolean allowed = rateLimitService.allowRequest(tenantId, clientIp, userId, apiPath);
 
         if (!allowed) {
             ApiErrorResponse errorResponse = new ApiErrorResponse(

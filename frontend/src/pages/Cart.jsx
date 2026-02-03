@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { cartApi, orderApi } from '../api/api';
+import { cartApi, orderApi, getErrorMessage } from '../api/api';
 import CartItem from '../components/CartItem';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,7 +22,7 @@ function Cart() {
             setCart(data);
         } catch (err) {
             console.error('Failed to fetch cart:', err);
-            setError('Failed to load cart. Please try again.');
+            setError(getErrorMessage(err, 'Failed to load cart. Please try again.'));
         } finally {
             setLoading(false);
         }
@@ -49,7 +49,7 @@ function Cart() {
             showToast('success', 'Cart updated');
         } catch (err) {
             console.error('Failed to update quantity:', err);
-            showToast('error', 'Failed to update quantity');
+            showToast('error', getErrorMessage(err, 'Failed to update quantity'));
         }
     };
 
@@ -66,7 +66,7 @@ function Cart() {
             showToast('success', 'Order placed successfully!');
         } catch (err) {
             console.error('Failed to place order:', err);
-            const message = err.response?.data?.message || 'Failed to place order. Please try again.';
+            const message = getErrorMessage(err, 'Failed to place order. Please try again.');
             showToast('error', message);
         } finally {
             setOrderLoading(false);
@@ -76,7 +76,9 @@ function Cart() {
     // Calculate summary
     const items = cart?.items || [];
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-    const subtotal = cart?.totalPrice || 0;
+    const subtotal = cart?.subtotal || cart?.totalPrice || 0;
+    const discountAmount = cart?.discountAmount || 0;
+    const finalTotal = cart?.totalPrice || 0;
 
     if (loading) {
         return (
@@ -161,6 +163,18 @@ function Cart() {
                                 <span>Total</span>
                                 <span className="text-gradient">${orderSuccess.totalAmount?.toFixed(2)}</span>
                             </div>
+                            {orderSuccess.discountAmount > 0 && (
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    paddingBottom: 'var(--spacing-md)',
+                                    color: 'var(--color-success)',
+                                    fontSize: 'var(--font-size-sm)'
+                                }}>
+                                    <span>Discount Applied</span>
+                                    <span>-${orderSuccess.discountAmount?.toFixed(2)}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -220,8 +234,20 @@ function Cart() {
                         </div>
 
                         <div className="cart-summary-total">
-                            <span>Total</span>
+                            <span>Subtotal</span>
                             <span>${subtotal.toFixed(2)}</span>
+                        </div>
+
+                        {discountAmount > 0 && (
+                            <div className="cart-summary-row" style={{ color: 'var(--color-success)' }}>
+                                <span>Discount (10%)</span>
+                                <span>-${discountAmount.toFixed(2)}</span>
+                            </div>
+                        )}
+
+                        <div className="cart-summary-total" style={{ marginTop: 'var(--spacing-sm)', paddingTop: 'var(--spacing-sm)', borderTop: '1px solid var(--border-color)' }}>
+                            <span>Total</span>
+                            <span>${finalTotal.toFixed(2)}</span>
                         </div>
 
                         <button

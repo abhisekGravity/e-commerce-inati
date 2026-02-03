@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authApi, tenantApi } from '../api/api';
+import { authApi, tenantApi, getErrorMessage } from '../api/api';
+import Cookies from 'js-cookie';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken'));
+    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken'));
     const [tenantSlug, setTenantSlug] = useState(localStorage.getItem('tenantSlug'));
     const [tenants, setTenants] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -43,9 +45,12 @@ export function AuthProvider({ children }) {
             setError(null);
             const response = await authApi.login(email, password);
             const token = response.accessToken;
+            const refresh = response.refreshToken;
 
             setAccessToken(token);
+            setRefreshToken(refresh);
             localStorage.setItem('accessToken', token);
+            localStorage.setItem('refreshToken', refresh);
 
             // Decode JWT to get user info (basic decode)
             try {
@@ -57,7 +62,7 @@ export function AuthProvider({ children }) {
 
             return { success: true };
         } catch (err) {
-            const message = err.response?.data?.message || 'Login failed. Please check your credentials.';
+            const message = getErrorMessage(err, 'Login failed. Please check your credentials.');
             setError(message);
             return { success: false, error: message };
         }
@@ -69,9 +74,12 @@ export function AuthProvider({ children }) {
             setError(null);
             const response = await authApi.register(email, password);
             const token = response.accessToken;
+            const refresh = response.refreshToken;
 
             setAccessToken(token);
+            setRefreshToken(refresh);
             localStorage.setItem('accessToken', token);
+            localStorage.setItem('refreshToken', refresh);
 
             // Decode JWT to get user info
             try {
@@ -83,7 +91,7 @@ export function AuthProvider({ children }) {
 
             return { success: true };
         } catch (err) {
-            const message = err.response?.data?.message || 'Registration failed. Please try again.';
+            const message = getErrorMessage(err, 'Registration failed. Please try again.');
             setError(message);
             return { success: false, error: message };
         }
@@ -97,8 +105,16 @@ export function AuthProvider({ children }) {
             console.error('Logout error:', err);
         } finally {
             setAccessToken(null);
+            setRefreshToken(null);
             setUser(null);
+            setTenantSlug(null);
             localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('tenantSlug');
+
+            // Extra safety: clear any non-HttpOnly cookies with js-cookie
+            Cookies.remove('accessToken');
+            Cookies.remove('refresh_token', { path: '/' });
         }
     }, []);
 

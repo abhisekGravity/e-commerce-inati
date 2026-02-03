@@ -17,11 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "carts")
-@CompoundIndex(
-        name = "unique_active_cart_per_user_tenant",
-        def = "{'tenantId': 1, 'userId': 1, 'active': 1}",
-        unique = true
-)
+@CompoundIndex(name = "unique_active_cart_per_user_tenant", def = "{'tenantId': 1, 'userId': 1, 'active': 1}", unique = true)
 public class Cart extends TenantAwareEntity {
 
     @Id
@@ -30,14 +26,16 @@ public class Cart extends TenantAwareEntity {
     private String userId;
 
     @Builder.Default
-    private boolean active = true;
-
-    @Builder.Default
     private List<CartItem> items = new ArrayList<>();
 
     @Builder.Default
-    private BigDecimal totalPrice = BigDecimal.ZERO;
+    private BigDecimal subtotal = BigDecimal.ZERO;
 
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Builder.Default
+    private BigDecimal totalPrice = BigDecimal.ZERO;
 
     public void addOrUpdateItem(CartItem newItem) {
         items.removeIf(i -> i.getSku().equals(newItem.getSku()));
@@ -46,9 +44,17 @@ public class Cart extends TenantAwareEntity {
     }
 
     public void recalculateTotal() {
-        this.totalPrice = items.stream()
+        this.subtotal = items.stream()
                 .map(CartItem::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (this.subtotal.compareTo(BigDecimal.valueOf(100)) > 0) {
+            this.discountAmount = this.subtotal.multiply(BigDecimal.valueOf(0.10));
+        } else {
+            this.discountAmount = BigDecimal.ZERO;
+        }
+
+        this.totalPrice = this.subtotal.subtract(this.discountAmount);
     }
 
     public boolean isEmpty() {

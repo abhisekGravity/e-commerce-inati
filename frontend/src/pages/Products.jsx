@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { productApi, cartApi } from '../api/api';
+import { productApi, cartApi, getErrorMessage } from '../api/api';
 import ProductCard from '../components/ProductCard';
 
 function Products() {
@@ -53,7 +53,7 @@ function Products() {
             setTotalElements(response.totalElements || 0);
         } catch (err) {
             console.error('Failed to fetch products:', err);
-            setError('Failed to load products. Please try again.');
+            setError(getErrorMessage(err, 'Failed to load products. Please try again.'));
         } finally {
             setLoading(false);
         }
@@ -98,7 +98,7 @@ function Products() {
             setTimeout(() => setToast(null), 3000);
         } catch (err) {
             console.error('Failed to add to cart:', err);
-            const message = err.response?.data?.message || 'Failed to add item to cart';
+            const message = getErrorMessage(err, 'Failed to add item to cart');
             setToast({ type: 'error', message });
             setTimeout(() => setToast(null), 3000);
         }

@@ -10,11 +10,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("users")
-@CompoundIndex(
-        name = "tenant_email_unique_idx",
-        def = "{'tenantId': 1, 'email': 1}",
-        unique = true
-)
+@CompoundIndex(name = "tenant_email_unique_idx", def = "{'tenantId': 1, 'email': 1}", unique = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,5 +23,4 @@ public class User extends TenantAwareEntity {
     private String email;
     private String passwordHash;
 
-    private int tokenVersion = 0;
 }

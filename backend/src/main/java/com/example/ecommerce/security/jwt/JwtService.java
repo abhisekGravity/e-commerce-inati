@@ -18,20 +18,35 @@ public class JwtService {
         this.keyProvider = keyProvider;
     }
 
-    public String generateAccessToken(String userId, String tenantId, int tokenVersion) {
+    public String generateAccessToken(String userId, String tenantId) {
         try {
 
             return Jwts.builder()
                     .setSubject(userId)
                     .claim("tenantId", tenantId)
-                    .claim("tokenVersion", tokenVersion)
                     .setIssuedAt(new Date())
-                    .setExpiration(Date.from(Instant.now().plusSeconds(900)))
+                    .setExpiration(Date.from(Instant.now().plusSeconds(120)))
                     .signWith(keyProvider.getPrivateKey(), SignatureAlgorithm.RS256)
                     .compact();
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate JWT", e);
+            throw new RuntimeException("Failed to generate access JWT", e);
+        }
+    }
+
+    public String generateRefreshToken(String userId, String tenantId) {
+        try {
+
+            return Jwts.builder()
+                    .setSubject(userId)
+                    .claim("tenantId", tenantId)
+                    .setIssuedAt(new Date())
+                    .setExpiration(Date.from(Instant.now().plusSeconds(7 * 24 * 3600)))
+                    .signWith(keyProvider.getPrivateKey(), SignatureAlgorithm.RS256)
+                    .compact();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate refresh JWT", e);
         }
     }
 

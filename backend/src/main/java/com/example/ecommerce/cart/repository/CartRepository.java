@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface CartRepository extends MongoRepository<Cart, String> {
 
-    Optional<Cart> findByTenantIdAndUserIdAndActiveTrue(
+    Optional<Cart> findByTenantIdAndUserId(
             String tenantId,
             String userId
     );

@@ -44,15 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtService.validateToken(token);
 
             String userId = claims.getSubject();
-            Integer tokenVersion = claims.get("tokenVersion", Integer.class);
-
-            User user = userRepository.findById(userId)
-                    .orElseThrow();
-
-            if (!tokenVersion.equals(user.getTokenVersion())) {
-                reject(response);
-                return;
-            }
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(

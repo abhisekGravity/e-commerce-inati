@@ -28,5 +28,9 @@ public class Order extends TenantAwareEntity {
 
     private List<OrderItem> items;
 
+    private BigDecimal subtotal;
+
+    private BigDecimal discountAmount;
+
     private BigDecimal totalAmount;
 }

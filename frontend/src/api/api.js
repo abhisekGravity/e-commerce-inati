@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { getErrorMessage } from './errorUtils';
 
 // Base API configuration
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = '/api';
 
 // Create axios instance
 const api = axios.create({
@@ -9,7 +10,6 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true, // For cookies (refresh token)
 });
 
 // Request interceptor - add auth token and tenant slug
@@ -42,14 +42,20 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
+                const refreshToken = localStorage.getItem('refreshToken');
+                if (!refreshToken) throw new Error('No refresh token');
+
                 const response = await axios.post(
                     `${API_BASE_URL}/auth/refresh`,
-                    {},
-                    { withCredentials: true }
+                    refreshToken,
+                    { headers: { 'Content-Type': 'text/plain' } }
                 );
 
-                const { accessToken } = response.data;
+                const { accessToken, refreshToken: newRefreshToken } = response.data;
                 localStorage.setItem('accessToken', accessToken);
+                if (newRefreshToken) {
+                    localStorage.setItem('refreshToken', newRefreshToken);
+                }
 
                 // Retry original request with new token
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -57,6 +63,7 @@ api.interceptors.response.use(
             } catch (refreshError) {
                 // Refresh failed - clear auth and redirect to login
                 localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
                 localStorage.removeItem('tenantSlug');
                 window.location.href = '/login';
                 return Promise.reject(refreshError);
@@ -83,11 +90,6 @@ export const authApi = {
 
     logout: async () => {
         const response = await api.post('/auth/logout');
-        return response.data;
-    },
-
-    refresh: async () => {
-        const response = await api.post('/auth/refresh');
         return response.data;
     },
 };
@@ -165,4 +167,5 @@ export const orderApi = {
     },
 };
 
+export { getErrorMessage };
 export default api;

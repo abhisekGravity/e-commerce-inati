@@ -12,10 +12,10 @@ server:
 logging:
   level:
     root: INFO
-    org.springframework.web: INFO
-    org.springframework.data.mongodb: INFO
-    org.springframework.boot.autoconfigure: INFO
-    org.springframework.security: INFO
+    org.springframework.web: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.boot.autoconfigure: DEBUG
+    org.springframework.security: DEBUG
 
 springdoc:
   swagger-ui:

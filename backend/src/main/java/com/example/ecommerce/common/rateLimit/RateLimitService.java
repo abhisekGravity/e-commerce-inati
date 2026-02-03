@@ -11,11 +11,11 @@ public class RateLimitService {
 
     private final Map<String, RequestCounter> requestMap = new ConcurrentHashMap<>();
 
-    private final int MAX_REQUESTS = 10;
+    private final int MAX_REQUESTS = 100;
     private final long WINDOW_MS = 60_000;
 
-    public boolean allowRequest(String tenantId, String clientIp, String apiPath) {
-        String key = tenantId + ":" + clientIp + ":" + apiPath;
+    public boolean allowRequest(String tenantId, String clientIp, String userId, String apiPath) {
+        String key = tenantId + ":" + clientIp + ":" + userId + ":" + apiPath;
 
         RequestCounter counter = requestMap.computeIfAbsent(key, k -> new RequestCounter());
 

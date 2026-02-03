@@ -3,12 +3,8 @@ package com.example.ecommerce.auth.controller;
 import com.example.ecommerce.auth.service.AuthService;
 import com.example.ecommerce.auth.domain.AuthTokens;
 import com.example.ecommerce.auth.dto.AuthRequest;
-import com.example.ecommerce.auth.dto.AuthResponse;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,58 +16,26 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public AuthResponse register(@Valid @RequestBody AuthRequest request) {
-        return new AuthResponse(authService.register(request));
+    public AuthTokens register(@Valid @RequestBody AuthRequest request) {
+        return authService.register(request);
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody AuthRequest request,
-                              HttpServletResponse response) {
-
-        AuthTokens tokens = authService.login(request);
-        setRefreshCookie(response, tokens.getRefreshToken());
-        return new AuthResponse(tokens.getAccessToken());
+    public AuthTokens login(@Valid @RequestBody AuthRequest request) {
+        return authService.login(request);
     }
 
     @PostMapping("/refresh")
-    public AuthResponse refresh(
-            @CookieValue(name = "refresh_token") String refreshToken,
-            HttpServletResponse response) {
-
-        AuthTokens tokens = authService.refresh(refreshToken);
-        setRefreshCookie(response, tokens.getRefreshToken());
-        return new AuthResponse(tokens.getAccessToken());
+    public AuthTokens refresh(@RequestBody String refreshToken) {
+        return authService.refresh(refreshToken);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(
-            @CookieValue(name = "refresh_token", required = false) String refreshToken,
-            HttpServletResponse response
-    ) {
+    public ResponseEntity<String> logout(@RequestBody(required = false) String refreshToken) {
         if (refreshToken != null) {
             authService.logoutByRefreshToken(refreshToken);
         }
 
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
-                .httpOnly(true)
-                .path("/")
-                .maxAge(0)
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-        return ResponseEntity.ok(
-                ("User logged out successfully")
-        );
-    }
-
-    private void setRefreshCookie(HttpServletResponse response, String token) {
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
-                .httpOnly(true)
-                .path("/")
-                .maxAge(7 * 24 * 3600)
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok("User logged out successfully");
     }
 }

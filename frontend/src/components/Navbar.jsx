@@ -20,7 +20,7 @@ function Navbar({ cartItemCount = 0 }) {
         <nav className="navbar">
             <div className="navbar-container">
                 <Link to="/" className="navbar-brand">
-                    🛒 ShopPro
+                    🛒 Inati
                 </Link>
 
                 <button className="navbar-toggle" onClick={toggleMenu} aria-label="Toggle menu">

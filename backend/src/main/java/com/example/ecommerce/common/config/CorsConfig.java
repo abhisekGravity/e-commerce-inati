@@ -12,22 +12,23 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        
-        config.addAllowedOrigin("http://localhost:5173"); // Vite dev server
+
+        config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("http://localhost:5174");
 
         config.setAllowCredentials(true);
-        
+
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
         config.addAllowedMethod("PUT");
         config.addAllowedMethod("DELETE");
         config.addAllowedMethod("PATCH");
         config.addAllowedMethod("OPTIONS");
-        
+
         config.addAllowedHeader("*");
-        
+
         config.addExposedHeader("Authorization");
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 

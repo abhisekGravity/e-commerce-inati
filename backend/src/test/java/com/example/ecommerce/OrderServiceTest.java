@@ -70,7 +70,7 @@ class OrderServiceTest {
                 .build();
         Cart cart = Cart.builder().items(List.of(item)).build();
 
-        when(cartService.getActiveCart()).thenReturn(cart);
+        when(cartService.getCart()).thenReturn(cart);
 
         UpdateResult updateResult = mock(UpdateResult.class);
         when(updateResult.getModifiedCount()).thenReturn(1L);
@@ -104,7 +104,7 @@ class OrderServiceTest {
 
         assertThat(order).isEqualTo(existingOrder);
         verify(orderRepository, never()).save(any());
-        verify(cartService, never()).getActiveCart();
+        verify(cartService, never()).getCart();
     }
 
     @Test
@@ -115,7 +115,7 @@ class OrderServiceTest {
         when(orderRepository.findByTenantIdAndIdempotencyKey(any(), any()))
                 .thenReturn(Optional.empty());
 
-        when(cartService.getActiveCart()).thenReturn(emptyCart);
+        when(cartService.getCart()).thenReturn(emptyCart);
 
         assertThatThrownBy(() -> orderService.placeOrder(idempotencyKey))
                 .isInstanceOf(IllegalStateException.class)
@@ -138,7 +138,7 @@ class OrderServiceTest {
                 .build();
         Cart cart = Cart.builder().items(List.of(item)).build();
 
-        when(cartService.getActiveCart()).thenReturn(cart);
+        when(cartService.getCart()).thenReturn(cart);
 
         UpdateResult updateResult = mock(UpdateResult.class);
         when(updateResult.getModifiedCount()).thenReturn(0L);

@@ -66,7 +66,7 @@ class CartServiceTest {
         when(productRepository.findByTenantIdAndSku("tenant-1", "SKU-1"))
                 .thenReturn(Optional.of(product));
 
-        when(cartRepository.findByTenantIdAndUserIdAndActiveTrue("tenant-1", "user-1"))
+        when(cartRepository.findByTenantIdAndUserId("tenant-1", "user-1"))
                 .thenReturn(Optional.empty());
 
         when(pricingService.getFinalPrice(any(PricingContext.class)))
@@ -95,13 +95,12 @@ class CartServiceTest {
 
         Cart existingCart = Cart.builder()
                 .userId("user-1")
-                .active(true)
                 .build();
 
         when(productRepository.findByTenantIdAndSku(any(), any()))
                 .thenReturn(Optional.of(product));
 
-        when(cartRepository.findByTenantIdAndUserIdAndActiveTrue(any(), any()))
+        when(cartRepository.findByTenantIdAndUserId(any(), any()))
                 .thenReturn(Optional.of(existingCart));
 
         when(pricingService.getFinalPrice(any()))
@@ -142,47 +141,45 @@ class CartServiceTest {
 
     @Test
     void getActiveCart_returnsCart() {
-        Cart cart = Cart.builder().active(true).build();
+        Cart cart = Cart.builder().build();
 
-        when(cartRepository.findByTenantIdAndUserIdAndActiveTrue(any(), any()))
+        when(cartRepository.findByTenantIdAndUserId(any(), any()))
                 .thenReturn(Optional.of(cart));
 
-        Cart result = cartService.getActiveCart();
+        Cart result = cartService.getCart();
 
         assertThat(result).isNotNull();
     }
 
     @Test
     void getActiveCart_throwsExceptionWhenNotFound() {
-        when(cartRepository.findByTenantIdAndUserIdAndActiveTrue(any(), any()))
+        when(cartRepository.findByTenantIdAndUserId(any(), any()))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> cartService.getActiveCart())
-                .isInstanceOf(ActiveCartNotFoundException.class);
+        assertThatThrownBy(() -> cartService.getCart())
+                .isInstanceOf(CartNotFoundException.class);
     }
 
     @Test
     void clearCart_disablesActiveCart() {
         Cart cart = Cart.builder()
-                .active(true)
                 .build();
 
-        when(cartRepository.findByTenantIdAndUserIdAndActiveTrue(any(), any()))
+        when(cartRepository.findByTenantIdAndUserId(any(), any()))
                 .thenReturn(Optional.of(cart));
 
         cartService.clearCart("user-1");
 
-        assertThat(cart.isActive()).isFalse();
         verify(cartRepository).save(cart);
     }
 
     @Test
     void clearCart_throwsExceptionWhenNoActiveCart() {
-        when(cartRepository.findByTenantIdAndUserIdAndActiveTrue(any(), any()))
+        when(cartRepository.findByTenantIdAndUserId(any(), any()))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 cartService.clearCart("user-1"))
-                .isInstanceOf(ActiveCartNotFoundException.class);
+                .isInstanceOf(CartNotFoundException.class);
     }
 }

@@ -22,6 +22,6 @@ public class CartController {
 
     @GetMapping
     public Cart getCart() {
-        return cartService.getActiveCart();
+        return cartService.getCart();
     }
 }

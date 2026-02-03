@@ -3,7 +3,7 @@ package com.example.ecommerce.cart.service;
 import com.example.ecommerce.cart.domain.Cart;
 import com.example.ecommerce.cart.domain.CartItem;
 import com.example.ecommerce.cart.repository.CartRepository;
-import com.example.ecommerce.exception.cart.ActiveCartNotFoundException;
+import com.example.ecommerce.exception.cart.CartNotFoundException;
 import com.example.ecommerce.exception.cart.ProductNotFoundForCartException;
 import com.example.ecommerce.exception.cart.InsufficientInventoryException;
 import com.example.ecommerce.pricing.dto.PricingContext;
@@ -21,83 +21,81 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class CartService {
 
-    private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
-    private final PricingService pricingService;
+        private final CartRepository cartRepository;
+        private final ProductRepository productRepository;
+        private final PricingService pricingService;
 
-    public Cart addToCart( String sku, int quantity) {
+        public Cart addToCart(String sku, int quantity) {
 
-        String userId = SecurityUtil.getCurrentUserId();
-        String tenantId = TenantContext.getTenantId();
+                String userId = SecurityUtil.getCurrentUserId();
+                String tenantId = TenantContext.getTenantId();
 
-        Product product = productRepository
-                .findByTenantIdAndSku(tenantId, sku)
-                .orElseThrow(() -> new ProductNotFoundForCartException(sku));
+                Product product = productRepository
+                                .findByTenantIdAndSku(tenantId, sku)
+                                .orElseThrow(() -> new ProductNotFoundForCartException(sku));
 
-        validateInventory(product, quantity);
+                validateInventory(product, quantity);
 
-        Cart cart = cartRepository
-                .findByTenantIdAndUserIdAndActiveTrue(tenantId, userId)
-                .orElseGet(() -> Cart.builder()
-                        .userId(userId)
-                        .active(true)
-                        .build()
-                );
+                Cart cart = cartRepository
+                                .findByTenantIdAndUserId(tenantId, userId)
+                                .orElseGet(() -> Cart.builder()
+                                                .userId(userId)
+                                                .build());
 
-        PricingContext pricingContext = PricingContext.builder()
-                .tenantId(tenantId)
-                .sku(sku)
-                .basePrice(product.getBasePrice())
-                .inventory(product.getInventory())
-                .build();
+                PricingContext pricingContext = PricingContext.builder()
+                                .tenantId(tenantId)
+                                .sku(sku)
+                                .basePrice(product.getBasePrice())
+                                .inventory(product.getInventory())
+                                .build();
 
-        BigDecimal finalUnitPrice = pricingService.getFinalPrice(pricingContext);
+                BigDecimal finalUnitPrice = pricingService.getFinalPrice(pricingContext);
 
-        CartItem item = CartItem.builder()
-                .productId(product.getId())
-                .sku(sku)
-                .name(product.getName())
-                .quantity(quantity)
-                .unitPrice(finalUnitPrice)
-                .build();
+                CartItem item = CartItem.builder()
+                                .productId(product.getId())
+                                .sku(sku)
+                                .name(product.getName())
+                                .quantity(quantity)
+                                .unitPrice(finalUnitPrice)
+                                .build();
 
-        item.recalculate();
+                item.recalculate();
 
-        cart.addOrUpdateItem(item);
+                cart.addOrUpdateItem(item);
 
-        return cartRepository.save(cart);
-    }
-
-    public Cart getActiveCart() {
-
-        String userId = SecurityUtil.getCurrentUserId();
-
-        return cartRepository
-                .findByTenantIdAndUserIdAndActiveTrue(
-                        TenantContext.getTenantId(),
-                        userId
-                )
-                .orElseThrow(ActiveCartNotFoundException::new);
-    }
-
-    public void clearCart(String userId) {
-        Cart cart = cartRepository
-                .findByTenantIdAndUserIdAndActiveTrue(
-                        TenantContext.getTenantId(),
-                        userId
-                )
-                .orElseThrow(ActiveCartNotFoundException::new);
-
-        cart.setActive(false);
-        cartRepository.save(cart);
-    }
-
-    private void validateInventory(Product product, int quantity) {
-        if (product.getInventory() < quantity) {
-            throw new InsufficientInventoryException(
-                    quantity,
-                    product.getInventory()
-            );
+                return cartRepository.save(cart);
         }
-    }
+
+        public Cart getCart() {
+
+                String userId = SecurityUtil.getCurrentUserId();
+
+                Cart cart = cartRepository
+                                .findByTenantIdAndUserId(
+                                                TenantContext.getTenantId(),
+                                                userId)
+                                .orElseThrow(CartNotFoundException::new);
+
+                // Ensure totals are up-to-date (handles migration of old carts)
+                cart.recalculateTotal();
+                return cartRepository.save(cart);
+        }
+
+        public void clearCart(String userId) {
+                Cart cart = cartRepository
+                                .findByTenantIdAndUserId(
+                                                TenantContext.getTenantId(),
+                                                userId)
+                                .orElseThrow(CartNotFoundException::new);
+
+                cartRepository.delete(cart);
+        }
+
+        private void validateInventory(Product product, int quantity) {
+                if (product.getInventory() < quantity) {
+                        throw new InsufficientInventoryException(
+                                        quantity,
+                                        product.getInventory());
+                }
+        }
 }

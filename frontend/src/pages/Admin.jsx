@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { productApi, tenantApi } from '../api/api';
+import { productApi, tenantApi, getErrorMessage } from '../api/api';
 
 function Admin() {
     const { isAuthenticated, fetchTenants } = useAuth();
@@ -59,7 +59,7 @@ function Admin() {
             setProductForm({ sku: '', name: '', basePrice: '', inventory: '' });
         } catch (err) {
             console.error('Failed to create product:', err);
-            const message = err.response?.data?.message || 'Failed to create product. Please try again.';
+            const message = getErrorMessage(err, 'Failed to create product. Please try again.');
             setProductMessage({ type: 'error', text: message });
         } finally {
             setProductLoading(false);
@@ -86,7 +86,7 @@ function Admin() {
             fetchTenants(); // Refresh tenant list
         } catch (err) {
             console.error('Failed to create tenant:', err);
-            const message = err.response?.data?.message || 'Failed to create tenant. Please try again.';
+            const message = getErrorMessage(err, 'Failed to create tenant. Please try again.');
             setTenantMessage({ type: 'error', text: message });
         } finally {
             setTenantLoading(false);

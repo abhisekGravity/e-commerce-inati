@@ -39,7 +39,7 @@ public class OrderService {
             return existing.get();
         }
 
-        Cart cart = cartService.getActiveCart();
+        Cart cart = cartService.getCart();
         if (cart.isEmpty()) {
             throw new IllegalStateException("Cart is empty");
         }
@@ -54,8 +54,7 @@ public class OrderService {
 
             if (result.getModifiedCount() == 0) {
                 throw new IllegalStateException(
-                        "Insufficient stock for SKU: " + item.getSku()
-                );
+                        "Insufficient stock for SKU: " + item.getSku());
             }
 
             OrderItem orderItem = OrderItem.builder()
@@ -66,8 +65,7 @@ public class OrderService {
                     .unitPrice(item.getUnitPrice())
                     .totalPrice(
                             item.getUnitPrice()
-                                    .multiply(BigDecimal.valueOf(item.getQuantity()))
-                    )
+                                    .multiply(BigDecimal.valueOf(item.getQuantity())))
                     .build();
 
             orderItems.add(orderItem);
@@ -80,11 +78,12 @@ public class OrderService {
                 .idempotencyKey(idempotencyKey)
                 .status(OrderStatus.CREATED)
                 .items(orderItems)
-                .totalAmount(total)
+                .subtotal(cart.getSubtotal())
+                .discountAmount(cart.getDiscountAmount())
+                .totalAmount(cart.getTotalPrice())
                 .build();
 
         orderRepository.save(order);
-
 
         cartService.clearCart(userId);
 

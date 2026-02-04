@@ -59,10 +59,19 @@ api.interceptors.response.use(
                 );
 
                 const { accessToken, refreshToken: newRefreshToken } = response.data;
-                Cookies.set('accessToken', accessToken, { expires: 1 });
+
+                // 15 minutes from now
+                const accessTokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
+                // 7 days from now
+                const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+                Cookies.set('accessToken', accessToken, { expires: accessTokenExpiry });
+
                 if (newRefreshToken) {
-                    Cookies.set('refreshToken', newRefreshToken, { expires: 7 });
+                    Cookies.set('refreshToken', newRefreshToken, { expires: refreshTokenExpiry });
                 }
+
 
                 // Retry original request with new token
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;

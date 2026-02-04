@@ -1,187 +1,115 @@
-# Multi-Tenant E-Commerce API
+# Multi-Tenant E-Commerce Platform
 
-A robust, multi-tenant e-commerce backend built with Spring Boot 3.2, MongoDB, and JWT Authentication. Provides RESTful APIs for tenants, products, shopping carts, orders, and user authentication.
+A robust, full-stack multi-tenant e-commerce solution built with Spring Boot 3.2 (Backend) and React + Vite (Frontend). Features isolated data per tenant, secure JWT authentication with cookie storage, dynamic pricing strategies, and a responsive UI.
 
 ## Features
 
-* Multi-Tenancy Support: Isolated data per tenant
-* JWT Authentication: Secure login/register with access and refresh tokens
-* Product Management: CRUD operations with filtering, sorting, and pagination
-* Shopping Cart: Add/remove items with inventory validation
-* Order Processing: Idempotent order placement with transactional support
-* Rate Limiting: Built-in request rate limiting
-* API Documentation: Swagger UI integration
-* Request Logging: Comprehensive request/response logging
+### Core
+*   **Multi-Tenancy**: Verified data isolation per tenant across all resources.
+*   **Secure Authentication**: JWT-based login/register with HttpOnly-ready Cookie storage for Access & Refresh tokens.
+*   **Rate Limiting**: Built-in request limiting for API protection.
+
+### Commerce & Pricing
+*   **Dynamic Pricing Engine**: 
+    *   **Base vs. Discounted Price**: Visual indicators for price drops (strikethrough original price).
+    *   **Named Discounts**: Context-aware discounts (e.g., "10% Off Order > $100").
+*   **Shopping Cart**: Real-time inventory validation, quantity management, and auto-recalculation.
+*   **Order Systems**: Idempotent order placement to prevent duplicate charges.
+*   **Product Management**: Advanced filtering (price, stock), sorting, and search.
+
+### Frontend
+*   **Modern UI**: Responsive design with Dark Mode aesthetics.
+*   **State Management**: efficient Context API usage for Auth and Cart state.
+*   **Optimized Storage**: Migrated from LocalStorage to Cookies for better security posture.
+
+---
 
 ## Tech Stack
 
-| Technology        | Version | Purpose                        |
-| ----------------- | ------- | ------------------------------ |
-| Java              | 17      | Language                       |
-| Spring Boot       | 3.2.4   | Framework                      |
-| MongoDB           | -       | Database                       |
-| Spring Security   | -       | Authentication & Authorization |
-| JWT (jjwt)        | 0.11.5  | Token-based auth               |
-| Lombok            | -       | Boilerplate reduction          |
-| SpringDoc OpenAPI | 2.3.0   | API Documentation              |
+### Backend
+*   **Framework**: Spring Boot 3.2, Spring Security
+*   **Database**: MongoDB (Reactive & Template support)
+*   **Language**: Java 17
+*   **Documentation**: SpringDoc OpenAPI (Swagger UI)
+
+### Frontend
+*   **Framework**: React 18, Vite
+*   **Styling**: Modern CSS3 (Variables, Flexbox/Grid)
+*   **HTTP Client**: Axios (with Interceptors for auto-refresh)
+*   **Utils**: `js-cookie`, `uuid`
+
+---
 
 ## Getting Started
 
 ### Prerequisites
+*   Java 17+
+*   Node.js 18+ & npm
+*   MongoDB (running on `localhost:27017`)
 
-* Java 17 or higher
-* MongoDB running on localhost:27017
-* Maven (or use the included wrapper)
-
-### Installation
-
+### 1. Backend Setup
 ```bash
-git clone https://github.com/your-username/e-commerce-inati.git
-cd e-commerce-inati
-```
-
-Start MongoDB:
-
-```bash
-# Using Docker
-docker run -d -p 27017:27017 --name mongodb mongo:latest
-```
-
-Run the application:
-
-```bash
+cd backend
 # Windows
 .\mvnw.cmd spring-boot:run
-
 # Linux/Mac
 ./mvnw spring-boot:run
 ```
+*   API Base URL: `http://localhost:8080/api`
+*   Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 
-Access:
+### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*   Access App: `http://localhost:5173` (Default Vite port)
 
-* API Base URL: `http://localhost:8080`
-* Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+---
 
 ## Project Structure
 
 ```
-src/main/java/com/example/ecommerce/
-├── auth/           # Authentication
-├── cart/           # Shopping cart management
-├── common/         # Shared configs, filters, rate limiting
-├── exception/      # Global exception handling
-├── inventory/      # Inventory management service
-├── order/          # Order processing
-├── pricing/        # Pricing logic
-├── product/        # Product CRUD operations
-├── security/       # JWT & security configuration
-├── tenant/         # Multi-tenant support
-└── User/           # User domain & repository
+e-commerce-inati/
+├── backend/src/main/java/com/example/ecommerce/
+│   ├── auth/       # Auth Controller, Service, JWT logic
+│   ├── cart/       # Cart domain & strategies
+│   ├── order/      # Order processing & state machine
+│   ├── pricing/    # Discount engines & strategies
+│   ├── product/    # Product catalog logic
+│   ├── tenant/     # Multi-tenancy context & filters
+│   └── ...
+└── frontend/src/
+    ├── api/        # Axios setup & API endpoints
+    ├── components/ # Reusable UI (Navbar, CartItem)
+    ├── context/    # AuthContext (Cookie mgmt)
+    ├── pages/      # Route pages (Home, Cart, Login)
+    └── ...
 ```
 
-## API Endpoints
+## Authentication Flow (Cookie-Based)
 
-### Authentication
-
-| Method | Endpoint         | Description          |
-| ------ | ---------------- | -------------------- |
-| POST   | `/auth/register` | Register a new user  |
-| POST   | `/auth/login`    | Login and get tokens |
-| POST   | `/auth/refresh`  | Refresh access token |
-| POST   | `/auth/logout`   | Logout user          |
-
-### Tenant Management
-
-| Method | Endpoint          | Description         |
-| ------ | ----------------- | ------------------- |
-| POST   | `/tenants/create` | Create a new tenant |
-| GET    | `/tenants/getAll` | Get all tenants     |
-
-### Products
-
-| Method | Endpoint    | Description                |
-| ------ | ----------- | -------------------------- |
-| POST   | `/products` | Create a new product       |
-| GET    | `/products` | List products with filters |
-
-**Query Parameters for GET `/products`:**
-
-* sku, name, minPrice, maxPrice, inStock, sortBy (PRICE, INVENTORY, NAME), direction (ASC/DESC), limit, offset
-
-### Shopping Cart
-
-| Method | Endpoint    | Description      |
-| ------ | ----------- | ---------------- |
-| GET    | `/cart`     | Get current cart |
-| POST   | `/cart/add` | Add item to cart |
-
-### Orders
-
-| Method | Endpoint  | Description                                        |
-| ------ | --------- | -------------------------------------------------- |
-| POST   | `/orders` | Place an order (requires `Idempotency-Key` header) |
-
-## Authentication Flow
-
-1. Register a new user with email and password
-2. Login to receive an access token (and refresh token in cookie)
-3. Include the access token in the `Authorization` header
-4. Refresh the token when expired using the refresh token cookie
-5. Logout to invalidate the refresh token
-
-## Configuration
-
-Edit `src/main/resources/application.yml`:
-
-```yaml
-spring:
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/e-commerce
-
-server:
-  port: 8080
-
-logging:
-  level:
-    root: INFO
-    org.springframework.web: INFO
-```
-
-## Testing
-
-```bash
-# Windows
-.\mvnw.cmd test
-
-# Linux/Mac
-./mvnw test
-```
-
-## Postman Collection
-
-Included in project root: `postman_collection.json`
+1.  **Login**: Backend issues access/refresh tokens.
+2.  **Storage**: Frontend intercepts response and stores tokens in **Cookies** (expires: 7 days for access, 30 days for refresh).
+3.  **Requests**: Axios interceptor automatically attaches `Authorization: Bearer <token>` from cookie.
+4.  **Auto-Refresh**: On 401, frontend automatically calls `/refresh`, gets new tokens, updates cookies, and retries the request.
+5.  **Logout**: Frontend requests backend logout and clears all client-side cookies.
 
 ## API Documentation
 
-* Swagger UI: `http://localhost:8080/swagger-ui/index.html`
-* OpenAPI JSON: `openapi.json`
+*   **POST** `/auth/register` - Create account
+*   **POST** `/auth/login` - Authenticate
+*   **GET** `/products` - List/Filter products
+*   **GET** `/cart` - View active cart
+*   **POST** `/orders` - Place order (Idempotent)
 
 ## Author
 
 **Abhisek Nayak**
-
-* Email: [abhiseknayak84@gmail.com](mailto:abhiseknayak84@gmail.com)
-* Portfolio: [port-folio-iota-seven.vercel.app](http://port-folio-iota-seven.vercel.app/)
+*   Email: [abhiseknayak84@gmail.com](mailto:abhiseknayak84@gmail.com)
+*   Portfolio: [port-folio-iota-seven.vercel.app](http://port-folio-iota-seven.vercel.app/)
 
 ## License
 
 Licensed under the terms in the LICENSE file.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request

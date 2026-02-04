@@ -283,7 +283,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthResponse"
+                  "$ref": "#/components/schemas/AuthTokens"
                 }
               }
             }
@@ -297,23 +297,23 @@
           "auth-controller"
         ],
         "operationId": "refresh",
-        "parameters": [
-          {
-            "name": "refresh_token",
-            "in": "cookie",
-            "required": true,
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
             }
-          }
-        ],
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthResponse"
+                  "$ref": "#/components/schemas/AuthTokens"
                 }
               }
             }
@@ -327,16 +327,15 @@
           "auth-controller"
         ],
         "operationId": "logout",
-        "parameters": [
-          {
-            "name": "refresh_token",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -373,7 +372,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthResponse"
+                  "$ref": "#/components/schemas/AuthTokens"
                 }
               }
             }
@@ -539,6 +538,15 @@
               "$ref": "#/components/schemas/OrderItem"
             }
           },
+          "subtotal": {
+            "type": "number"
+          },
+          "discountAmount": {
+            "type": "number"
+          },
+          "discountName": {
+            "type": "string"
+          },
           "totalAmount": {
             "type": "number"
           }
@@ -563,6 +571,9 @@
           "unitPrice": {
             "type": "number"
           },
+          "baseUnitPrice": {
+            "type": "number"
+          },
           "totalPrice": {
             "type": "number"
           }
@@ -584,14 +595,20 @@
           "userId": {
             "type": "string"
           },
-          "active": {
-            "type": "boolean"
-          },
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CartItem"
             }
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "discountAmount": {
+            "type": "number"
+          },
+          "discountName": {
+            "type": "string"
           },
           "totalPrice": {
             "type": "number"
@@ -620,6 +637,9 @@
           "unitPrice": {
             "type": "number"
           },
+          "baseUnitPrice": {
+            "type": "number"
+          },
           "totalPrice": {
             "type": "number"
           }
@@ -642,10 +662,13 @@
           }
         }
       },
-      "AuthResponse": {
+      "AuthTokens": {
         "type": "object",
         "properties": {
           "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
             "type": "string"
           }
         }
@@ -660,12 +683,6 @@
           "totalPages": {
             "type": "integer",
             "format": "int32"
-          },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
           },
           "size": {
             "type": "integer",
@@ -683,6 +700,12 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
           },
           "numberOfElements": {
             "type": "integer",
@@ -728,10 +751,10 @@
           "empty": {
             "type": "boolean"
           },
-          "unsorted": {
+          "sorted": {
             "type": "boolean"
           },
-          "sorted": {
+          "unsorted": {
             "type": "boolean"
           }
         }

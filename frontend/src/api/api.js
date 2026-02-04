@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import { getErrorMessage } from './errorUtils';
 
 // Base API configuration
@@ -15,8 +16,8 @@ const api = axios.create({
 // Request interceptor - add auth token and tenant slug
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('accessToken');
-        const tenantSlug = localStorage.getItem('tenantSlug');
+        const token = Cookies.get('accessToken');
+        const tenantSlug = Cookies.get('tenantSlug');
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -42,8 +43,8 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const refreshToken = localStorage.getItem('refreshToken');
-                const tenantSlug = localStorage.getItem('tenantSlug');
+                const refreshToken = Cookies.get('refreshToken');
+                const tenantSlug = Cookies.get('tenantSlug');
                 if (!refreshToken) throw new Error('No refresh token');
 
                 const response = await axios.post(
@@ -58,9 +59,9 @@ api.interceptors.response.use(
                 );
 
                 const { accessToken, refreshToken: newRefreshToken } = response.data;
-                localStorage.setItem('accessToken', accessToken);
+                Cookies.set('accessToken', accessToken, { expires: 1 });
                 if (newRefreshToken) {
-                    localStorage.setItem('refreshToken', newRefreshToken);
+                    Cookies.set('refreshToken', newRefreshToken, { expires: 7 });
                 }
 
                 // Retry original request with new token
@@ -68,9 +69,10 @@ api.interceptors.response.use(
                 return api(originalRequest);
             } catch (refreshError) {
                 // Refresh failed - clear auth and redirect to login
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
-                localStorage.removeItem('tenantSlug');
+                Cookies.remove('accessToken');
+                Cookies.remove('refreshToken');
+                Cookies.remove('tenantSlug');
+                Cookies.remove('refresh_token', { path: '/' }); // Cleanup potential httpOnly
                 window.location.href = '/login';
                 return Promise.reject(refreshError);
             }

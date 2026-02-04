@@ -6,9 +6,9 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken'));
-    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken'));
-    const [tenantSlug, setTenantSlug] = useState(localStorage.getItem('tenantSlug'));
+    const [accessToken, setAccessToken] = useState(Cookies.get('accessToken'));
+    const [refreshToken, setRefreshToken] = useState(Cookies.get('refreshToken'));
+    const [tenantSlug, setTenantSlug] = useState(Cookies.get('tenantSlug'));
     const [tenants, setTenants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
     // Select tenant
     const selectTenant = useCallback((slug) => {
         setTenantSlug(slug);
-        localStorage.setItem('tenantSlug', slug);
+        Cookies.set('tenantSlug', slug, { expires: 365 });
     }, []);
 
     // Login
@@ -49,8 +49,8 @@ export function AuthProvider({ children }) {
 
             setAccessToken(token);
             setRefreshToken(refresh);
-            localStorage.setItem('accessToken', token);
-            localStorage.setItem('refreshToken', refresh);
+            Cookies.set('accessToken', token, { expires: 7 });
+            Cookies.set('refreshToken', refresh, { expires: 30 });
 
             // Decode JWT to get user info (basic decode)
             try {
@@ -78,8 +78,8 @@ export function AuthProvider({ children }) {
 
             setAccessToken(token);
             setRefreshToken(refresh);
-            localStorage.setItem('accessToken', token);
-            localStorage.setItem('refreshToken', refresh);
+            Cookies.set('accessToken', token, { expires: 7 });
+            Cookies.set('refreshToken', refresh, { expires: 30 });
 
             // Decode JWT to get user info
             try {
@@ -108,12 +108,13 @@ export function AuthProvider({ children }) {
             setRefreshToken(null);
             setUser(null);
             setTenantSlug(null);
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('tenantSlug');
 
-            // Extra safety: clear any non-HttpOnly cookies with js-cookie
+            // Clean up all cookies
             Cookies.remove('accessToken');
+            Cookies.remove('refreshToken');
+            Cookies.remove('tenantSlug');
+
+            // Allow for backend httpOnly cookie cleanup if you switch later
             Cookies.remove('refresh_token', { path: '/' });
         }
     }, []);

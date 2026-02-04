@@ -32,5 +32,7 @@ public class Order extends TenantAwareEntity {
 
     private BigDecimal discountAmount;
 
+    private String discountName;
+
     private BigDecimal totalAmount;
 }

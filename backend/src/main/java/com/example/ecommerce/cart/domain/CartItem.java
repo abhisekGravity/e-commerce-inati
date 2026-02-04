@@ -19,6 +19,8 @@ public class CartItem {
 
     private BigDecimal unitPrice;
 
+    private BigDecimal baseUnitPrice;
+
     private BigDecimal totalPrice;
 
     public void recalculate() {

@@ -57,11 +57,15 @@ public class CartService {
                                 .name(product.getName())
                                 .quantity(quantity)
                                 .unitPrice(finalUnitPrice)
+                                .baseUnitPrice(product.getBasePrice())
                                 .build();
 
                 item.recalculate();
 
                 cart.addOrUpdateItem(item);
+
+                // Apply global cart discounts
+                pricingService.applyCartDiscounts(cart);
 
                 return cartRepository.save(cart);
         }
@@ -76,8 +80,11 @@ public class CartService {
                                                 userId)
                                 .orElseThrow(CartNotFoundException::new);
 
-                // Ensure totals are up-to-date (handles migration of old carts)
                 cart.recalculateTotal();
+
+                // Apply global cart discounts
+                pricingService.applyCartDiscounts(cart);
+
                 return cartRepository.save(cart);
         }
 

@@ -12,6 +12,7 @@ import java.util.List;
 public class PricingEngine {
 
     private final List<PricingStrategy> strategies;
+    private final List<CartPricingStrategy> cartStrategies;
 
     public BigDecimal calculatePrice(PricingContext context) {
         BigDecimal price = context.basePrice();
@@ -28,5 +29,16 @@ public class PricingEngine {
         }
 
         return price;
+    }
+
+    public void applyCartDiscounts(com.example.ecommerce.cart.domain.Cart cart) {
+        cart.setDiscountAmount(BigDecimal.ZERO);
+        cart.setTotalPrice(cart.getSubtotal());
+
+        for (CartPricingStrategy strategy : cartStrategies) {
+            if (strategy.isApplicable(cart)) {
+                strategy.apply(cart);
+            }
+        }
     }
 }

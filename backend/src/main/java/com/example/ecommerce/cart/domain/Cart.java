@@ -34,6 +34,8 @@ public class Cart extends TenantAwareEntity {
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
+    private String discountName;
+
     @Builder.Default
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
@@ -48,13 +50,8 @@ public class Cart extends TenantAwareEntity {
                 .map(CartItem::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (this.subtotal.compareTo(BigDecimal.valueOf(100)) > 0) {
-            this.discountAmount = this.subtotal.multiply(BigDecimal.valueOf(0.10));
-        } else {
-            this.discountAmount = BigDecimal.ZERO;
-        }
-
-        this.totalPrice = this.subtotal.subtract(this.discountAmount);
+        this.discountAmount = BigDecimal.ZERO;
+        this.totalPrice = this.subtotal;
     }
 
     public boolean isEmpty() {

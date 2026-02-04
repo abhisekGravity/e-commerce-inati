@@ -149,8 +149,18 @@ function Cart() {
                                         borderBottom: '1px solid var(--border-color)'
                                     }}
                                 >
-                                    <span>{item.name} × {item.quantity}</span>
-                                    <span>${item.totalPrice?.toFixed(2)}</span>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                        {item.baseUnitPrice && item.unitPrice < item.baseUnitPrice && (
+                                            <span style={{
+                                                textDecoration: 'line-through',
+                                                color: 'var(--text-secondary)',
+                                                fontSize: '0.8em'
+                                            }}>
+                                                ${(item.baseUnitPrice * item.quantity).toFixed(2)}
+                                            </span>
+                                        )}
+                                        <span>${item.totalPrice?.toFixed(2)}</span>
+                                    </div>
                                 </div>
                             ))}
                             <div style={{
@@ -171,7 +181,7 @@ function Cart() {
                                     color: 'var(--color-success)',
                                     fontSize: 'var(--font-size-sm)'
                                 }}>
-                                    <span>Discount Applied</span>
+                                    <span>{orderSuccess.discountName || 'Discount Applied'}</span>
                                     <span>-${orderSuccess.discountAmount?.toFixed(2)}</span>
                                 </div>
                             )}
@@ -240,7 +250,7 @@ function Cart() {
 
                         {discountAmount > 0 && (
                             <div className="cart-summary-row" style={{ color: 'var(--color-success)' }}>
-                                <span>Discount (10%)</span>
+                                <span>{cart.discountName || 'Discount'}</span>
                                 <span>-${discountAmount.toFixed(2)}</span>
                             </div>
                         )}

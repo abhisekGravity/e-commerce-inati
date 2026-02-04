@@ -76,7 +76,6 @@ public class AuthService {
 
     @Transactional
     public void logoutByRefreshToken(String refreshToken) {
-        // Stateless logout - handled by frontend clearing LocalStorage
     }
 
     private AuthTokens issueNewTokenPair(User user) {

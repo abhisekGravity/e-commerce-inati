@@ -63,6 +63,7 @@ public class OrderService {
                     .name(item.getName())
                     .quantity(item.getQuantity())
                     .unitPrice(item.getUnitPrice())
+                    .baseUnitPrice(item.getBaseUnitPrice())
                     .totalPrice(
                             item.getUnitPrice()
                                     .multiply(BigDecimal.valueOf(item.getQuantity())))
@@ -80,6 +81,7 @@ public class OrderService {
                 .items(orderItems)
                 .subtotal(cart.getSubtotal())
                 .discountAmount(cart.getDiscountAmount())
+                .discountName(cart.getDiscountName())
                 .totalAmount(cart.getTotalPrice())
                 .build();
 

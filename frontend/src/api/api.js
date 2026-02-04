@@ -43,12 +43,18 @@ api.interceptors.response.use(
 
             try {
                 const refreshToken = localStorage.getItem('refreshToken');
+                const tenantSlug = localStorage.getItem('tenantSlug');
                 if (!refreshToken) throw new Error('No refresh token');
 
                 const response = await axios.post(
                     `${API_BASE_URL}/auth/refresh`,
                     refreshToken,
-                    { headers: { 'Content-Type': 'text/plain' } }
+                    {
+                        headers: {
+                            'Content-Type': 'text/plain',
+                            ...(tenantSlug && { 'x-tenant-slug': tenantSlug }),
+                        },
+                    }
                 );
 
                 const { accessToken, refreshToken: newRefreshToken } = response.data;

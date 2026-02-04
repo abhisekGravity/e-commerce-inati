@@ -16,4 +16,8 @@ public class PricingService {
     public BigDecimal getFinalPrice(PricingContext context) {
         return pricingEngine.calculatePrice(context);
     }
+
+    public void applyCartDiscounts(com.example.ecommerce.cart.domain.Cart cart) {
+        pricingEngine.applyCartDiscounts(cart);
+    }
 }

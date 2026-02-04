@@ -19,5 +19,7 @@ public class OrderItem {
 
     private BigDecimal unitPrice;
 
+    private BigDecimal baseUnitPrice;
+
     private BigDecimal totalPrice;
 }
